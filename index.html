@@ -1,0 +1,1401 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Mapeamento Melhorias Saj Defensorias",
+  "schemaVersion": 1,
+  "description": "Artefato interativo mapeando todas as solicitações de melhorias e falhas do SAJ Defensorias enviadas ao Gestor SAJ por defensores e colaboradores. Permite filtrar por categoria (Melhoria/Falha), módulo e solicitante, e ordenar por frequência de pedidos."
+}
+</script>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f7f8fa; color: #222; line-height: 1.5; padding: 24px; }
+.header { background: linear-gradient(135deg, #1e3a8a, #065f46); color: white; padding: 28px 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,.08); }
+.header h1 { font-size: 24px; margin-bottom: 8px; }
+.header p { opacity: .95; font-size: 14px; }
+.header .disclaimer { font-size: 12px; opacity: .85; margin-top: 6px; font-style: italic; }
+.criterio { background: rgba(255,255,255,.12); padding: 10px 14px; border-radius: 8px; margin-top: 12px; font-size: 12px; border-left: 3px solid #fbbf24; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 18px 0 0 0; }
+.stat { background: rgba(255,255,255,.13); padding: 12px 14px; border-radius: 8px; transition: background .15s, transform .12s; }
+.stat.clickable { cursor: pointer; }
+.stat.clickable:hover { background: rgba(255,255,255,.22); transform: translateY(-1px); }
+.stat.clickable:active { transform: translateY(0); }
+.stat .label { font-size: 12px; opacity: .85; }
+.stat .value { font-size: 24px; font-weight: 700; margin-top: 2px; }
+.controls { background: white; padding: 16px; border-radius: 10px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: end; }
+.control-group label { font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
+.control-group select, .control-group input { width: 100%; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: white; }
+.btn-clear { background: #ef4444; color: white; border: none; padding: 9px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; }
+.btn-clear:hover { background: #dc2626; }
+.summary-bar { background: white; padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; color: #555; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.legend-dot.falha { background: #dc2626; }
+.legend-dot.melhoria { background: #2563eb; }
+.legend-dot.configuracao { background: #7c3aed; }
+.tabs { display: flex; gap: 4px; background: #e5e7eb; padding: 3px; border-radius: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.tab { flex: 1; padding: 8px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; cursor: pointer; border-radius: 6px; color: #4b5563; min-width: 140px; }
+.tab.active { background: white; color: #111; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.card { background: white; border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.05); border-left: 4px solid #2563eb; transition: transform .12s, box-shadow .12s; cursor: pointer; position: relative; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,.1); border-left-width: 6px; }
+.card.falha { border-left-color: #dc2626; }
+.card.configuracao { border-left-color: #7c3aed; }
+.card.resolvido { border-left-color: #16a34a !important; }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+.card-title { font-size: 16px; font-weight: 700; color: #111; flex: 1; min-width: 200px; }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+.badge.cat-falha { background: #fee2e2; color: #991b1b; }
+.badge.cat-melhoria { background: #dbeafe; color: #1e40af; }
+.badge.cat-configuracao { background: #ede9fe; color: #5b21b6; }
+.badge.modulo { background: #f3f4f6; color: #374151; }
+.badge.integracao { background: #ffedd5; color: #9a3412; }
+.badge.gt { background: #cffafe; color: #155e75; }
+.badge.count { background: #fef3c7; color: #92400e; }
+.badge.resolvido { background: #16a34a; color: white; padding: 3px 10px; }
+.badge.resolvido .check { font-weight: 900; font-size: 12px; }
+.card-desc { font-size: 13px; color: #4b5563; margin-bottom: 10px; }
+.resolucao-note { background: #dcfce7; color: #14532d; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; border-left: 3px solid #16a34a; display: flex; align-items: flex-start; gap: 8px; }
+.resolucao-note .check-icon { color: #16a34a; font-weight: 900; flex-shrink: 0; font-size: 14px; }
+.solicitantes { font-size: 12px; color: #6b7280; padding-top: 8px; border-top: 1px dashed #e5e7eb; }
+.solicitantes-title { font-weight: 600; color: #374151; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+.solicitante-item { display: block; margin-bottom: 3px; font-size: 12px; }
+.solicitante-item .nome { font-weight: 600; color: #1f2937; }
+.solicitante-item .data { color: #9ca3af; }
+.ranking-card { background: white; border-radius: 10px; padding: 16px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.05); display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: center; cursor: pointer; transition: box-shadow .12s; }
+.ranking-card:hover { box-shadow: 0 4px 10px rgba(0,0,0,.08); }
+.ranking-pos { font-size: 26px; font-weight: 800; color: #d1d5db; text-align: center; }
+.ranking-pos.top1 { color: #f59e0b; }
+.ranking-pos.top2 { color: #9ca3af; }
+.ranking-pos.top3 { color: #d97706; }
+.ranking-title { font-weight: 700; font-size: 14px; color: #111; display: flex; align-items: center; gap: 8px; }
+.ranking-title .check-inline { color: #16a34a; font-weight: 900; }
+.ranking-meta { font-size: 12px; color: #6b7280; margin-top: 3px; }
+.ranking-count { background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 8px; font-weight: 700; font-size: 13px; }
+.ranking-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; background: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+.ranking-filter-btn { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.ranking-filter-btn:hover { background: #e5e7eb; }
+.ranking-filter-btn.active { background: #1e3a8a; color: white; border-color: #1e3a8a; }
+.ranking-filter-btn.active.melhoria { background: #2563eb; border-color: #2563eb; }
+.ranking-filter-btn.active.falha { background: #dc2626; border-color: #dc2626; }
+.ranking-filter-btn.active.configuracao { background: #7c3aed; border-color: #7c3aed; }
+.hidden { display: none !important; }
+.empty-state { background: white; border-radius: 10px; padding: 36px; text-align: center; color: #9ca3af; }
+.colaborador-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; background: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.04); cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.colaborador-bar:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,.08); }
+.colaborador-name { font-weight: 600; font-size: 13px; color: #111; min-width: 200px; }
+.bar-track { flex: 1; height: 22px; background: #f3f4f6; border-radius: 6px; overflow: hidden; position: relative; min-width: 100px; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #1e40af); display: flex; align-items: center; padding: 0 8px; color: white; font-size: 12px; font-weight: 600; transition: width .5s; }
+.module-chart { background: white; padding: 16px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.module-row { display: grid; grid-template-columns: 170px 1fr 40px; gap: 10px; align-items: center; padding: 8px 8px; font-size: 13px; border-radius: 6px; cursor: pointer; transition: background .12s; }
+.module-row:hover { background: #f9fafb; }
+.module-name { font-weight: 600; color: #111; }
+.module-bar { height: 18px; background: #f3f4f6; border-radius: 5px; overflow: hidden; }
+.module-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #4c1d95); }
+.module-count { text-align: right; font-weight: 700; color: #6b7280; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(17, 24, 39, .55); display: none; align-items: flex-start; justify-content: center; z-index: 100; padding: 30px 16px; overflow-y: auto; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 14px; width: 100%; max-width: 860px; box-shadow: 0 20px 40px rgba(0,0,0,.2); overflow: hidden; }
+.modal-header { background: linear-gradient(135deg, #1e3a8a, #065f46); color: white; padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.modal-header.resolvido { background: linear-gradient(135deg, #166534, #14532d); }
+.modal-header h2 { font-size: 18px; margin-bottom: 4px; }
+.modal-header .subtitle { font-size: 12px; opacity: .9; }
+.modal-close { background: rgba(255,255,255,.2); border: none; color: white; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: 700; flex-shrink: 0; }
+.modal-close:hover { background: rgba(255,255,255,.35); }
+.modal-body { padding: 20px 24px; max-height: 72vh; overflow-y: auto; }
+.modal-meta { background: #f3f4f6; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: #374151; }
+.modal-meta strong { color: #111; }
+.modal-resolucao { background: #dcfce7; color: #14532d; padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; border-left: 4px solid #16a34a; }
+.modal-resolucao .resolucao-title { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.email-block { border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+.email-header { background: #f9fafb; padding: 12px 16px; border-bottom: 1px solid #e5e7eb; }
+.email-sender { font-weight: 700; font-size: 14px; color: #111; }
+.email-subject { font-weight: 600; color: #1e3a8a; font-size: 13px; margin-top: 2px; }
+.email-meta { font-size: 11px; color: #6b7280; margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap; }
+.email-body { padding: 14px 16px; font-size: 13px; color: #374151; line-height: 1.6; white-space: pre-wrap; background: white; }
+.email-attachment { display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-top: 6px; }
+
+/* Priorização GT */
+.priorizacao-intro { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; color: #78350f; line-height: 1.6; }
+.priorizacao-intro strong { color: #422006; }
+.priorizacao-controls { background: white; padding: 16px; border-radius: 10px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.priorizacao-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.priorizacao-row:last-child { margin-bottom: 0; }
+.votante-input { padding: 9px 12px; border: 2px solid #1e3a8a; border-radius: 6px; font-size: 14px; min-width: 280px; flex: 1; max-width: 420px; }
+.votante-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+.priorizacao-stats { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #4b5563; }
+.priorizacao-stats span strong { color: #111; font-size: 14px; }
+.priorizacao-stats .over-mark { font-weight: 700; }
+.priorizacao-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-action { padding: 9px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all .15s; }
+.btn-export { background: #1e3a8a; color: white; border-color: #1e3a8a; }
+.btn-export:hover:not(:disabled) { background: #1e40af; }
+.btn-export:disabled { background: #9ca3af; border-color: #9ca3af; cursor: not-allowed; opacity: .8; }
+.btn-print { background: white; color: #1e3a8a; border-color: #1e3a8a; }
+.btn-print:hover:not(:disabled) { background: #eff6ff; }
+.btn-print:disabled { background: #f3f4f6; color: #9ca3af; border-color: #d1d5db; cursor: not-allowed; opacity: .8; }
+.btn-import { background: white; color: #065f46; border-color: #065f46; }
+.btn-import:hover { background: #ecfdf5; }
+.btn-clear-votes { background: white; color: #991b1b; border-color: #fecaca; }
+.btn-clear-votes:hover { background: #fef2f2; border-color: #fca5a5; }
+.toggle-only-pending { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #4b5563; cursor: pointer; user-select: none; }
+.toggle-only-pending input { width: 16px; height: 16px; cursor: pointer; }
+.priorizacao-warning { background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: #7f1d1d; line-height: 1.5; flex: 1; }
+.priorizacao-warning strong { color: #991b1b; }
+
+.tier-section { margin-bottom: 18px; border-radius: 8px; }
+.tier-header { padding: 12px 16px; border-radius: 8px 8px 0 0; color: white; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tier-header.p0 { background: linear-gradient(135deg, #991b1b, #dc2626); }
+.tier-header.p1 { background: linear-gradient(135deg, #c2410c, #ea580c); }
+.tier-header.p2 { background: linear-gradient(135deg, #a16207, #ca8a04); }
+.tier-header.p3 { background: linear-gradient(135deg, #1e40af, #3b82f6); }
+.tier-header.backlog { background: linear-gradient(135deg, #0e7490, #0891b2); }
+.tier-header.nao { background: linear-gradient(135deg, #4b5563, #6b7280); }
+.tier-header.descartada { background: linear-gradient(135deg, #1f2937, #374151); }
+.tier-header .tier-count { background: rgba(255,255,255,.25); padding: 3px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.tier-header .tier-count.full { background: rgba(255,255,255,.55); color: #111; }
+.tier-header .tier-count.over-limit { background: #dc2626; color: white; box-shadow: 0 0 0 2px rgba(255,255,255,.6); }
+.tier-body { background: white; border-radius: 0 0 8px 8px; padding: 8px 12px 12px; box-shadow: 0 1px 3px rgba(0,0,0,.05); min-height: 50px; }
+.tier-empty { color: #9ca3af; font-size: 12px; padding: 14px 6px; font-style: italic; text-align: center; }
+.drop-placeholder { height: 0; margin-top: 8px; background: rgba(0,0,0,.025); border: 2px dashed #cbd5e1; border-radius: 8px; pointer-events: none; transition: height .15s ease; overflow: hidden; box-sizing: content-box; }
+.drop-placeholder.tier-p0 { background: #fef7f7; border-color: #f5d6d6; }
+.drop-placeholder.tier-p1 { background: #fdf8f4; border-color: #f5dfc9; }
+.drop-placeholder.tier-p2 { background: #fbf8ed; border-color: #ecdfb8; }
+.drop-placeholder.tier-p3 { background: #f5f8fc; border-color: #d6dff0; }
+.drop-placeholder.tier-backlog { background: #f3fafb; border-color: #cce8ec; }
+.drop-placeholder.tier-nao { background: #f4f5f7; border-color: #d4d7de; }
+.drop-placeholder.tier-descartada { background: #f4f5f7; border-color: #d4d7de; }
+
+.prio-card { padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px; margin-top: 8px; background: white; cursor: grab; }
+.prio-card:active { cursor: grabbing; }
+.prio-card.dragging { display: none; }
+.prio-card.descartada-card { opacity: .55; }
+.prio-card.descartada-card .prio-title { text-decoration: line-through; text-decoration-color: #9ca3af; }
+.prio-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.prio-position { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 600; flex-shrink: 0; line-height: 1; letter-spacing: .2px; border: 1px solid; }
+.prio-position.p0 { background: #fef7f7; color: #b85a5a; border-color: #f5d6d6; }
+.prio-position.p1 { background: #fdf8f4; color: #b87340; border-color: #f5dfc9; }
+.prio-position.p2 { background: #fbf8ed; color: #a37b3a; border-color: #ecdfb8; }
+.prio-position.p3 { background: #f5f8fc; color: #5a78b0; border-color: #d6dff0; }
+.prio-title-wrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px; }
+.prio-title { font-weight: 700; font-size: 14px; color: #111; }
+.prio-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+.prio-desc { font-size: 12px; color: #6b7280; margin: 6px 0 10px; line-height: 1.5; }
+.prio-buttons { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.prio-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid #d1d5db; background: white; font-size: 12px; font-weight: 700; cursor: pointer; color: #4b5563; transition: all .15s; }
+.prio-btn:hover { border-color: #1e3a8a; color: #1e3a8a; }
+.prio-btn.active { color: white; }
+.prio-btn.active.p0 { background: #dc2626; border-color: #dc2626; }
+.prio-btn.active.p1 { background: #ea580c; border-color: #ea580c; }
+.prio-btn.active.p2 { background: #ca8a04; border-color: #ca8a04; }
+.prio-btn.active.p3 { background: #3b82f6; border-color: #3b82f6; }
+.prio-btn.active.backlog { background: #0891b2; border-color: #0891b2; }
+.prio-btn.descartar.active { background: #4b5563; border-color: #4b5563; }
+
+.priorizacao-print-header { display: none; }
+
+@media print {
+  body { padding: 0; background: white; font-size: 11px; }
+  .header { background: white; color: #111; box-shadow: none; padding: 8px 0 6px; border-bottom: 2px solid #1e3a8a; margin-bottom: 10px; border-radius: 0; }
+  .header .stats, .header .criterio, .header .disclaimer { display: none !important; }
+  .header h1 { font-size: 16px; }
+  .header p { font-size: 11px; color: #4b5563; }
+  .tabs, .modal-overlay { display: none !important; }
+  #tab-lista, #tab-ranking, #tab-colegas, #tab-modulos { display: none !important; }
+  #tab-priorizacao, #tab-priorizacao.hidden { display: block !important; }
+  .priorizacao-intro, .priorizacao-controls { display: none !important; }
+  .priorizacao-print-header { display: block !important; padding: 12px 14px; border: 2px solid #1e3a8a; border-radius: 8px; margin-bottom: 12px; }
+  .priorizacao-print-header h2 { font-size: 14px; margin-bottom: 4px; color: #1e3a8a; }
+  .priorizacao-print-header .meta { font-size: 11px; color: #4b5563; }
+  .prio-buttons { display: none !important; }
+  .prio-card { cursor: default; }
+  .tier-section { break-inside: avoid; page-break-inside: avoid; margin-bottom: 12px; }
+  .tier-header { padding: 8px 12px; }
+  .tier-body { box-shadow: none; padding: 6px 10px 8px; }
+  .prio-card { break-inside: avoid; page-break-inside: avoid; padding: 8px 10px; margin-top: 6px; }
+  .prio-title { font-size: 12px; }
+  .prio-desc { font-size: 10px; margin: 3px 0 4px; }
+  .prio-position { min-width: 22px; height: 18px; font-size: 10px; }
+  .drop-placeholder { display: none !important; }
+}
+
+@media (max-width: 600px) {
+  body { padding: 12px; }
+  .header { padding: 20px 16px; }
+  .header h1 { font-size: 18px; }
+  .card { padding: 12px; }
+  .card-title { font-size: 14px; }
+  .modal { max-width: 100%; }
+  .modal-header { padding: 16px; }
+  .modal-body { padding: 14px; }
+  .votante-input { min-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Mapeamento de Melhorias e Falhas - SAJ Defensorias</h1>
+  <p>Sugestões e falhas reportadas pelos colegas da DPE/MS ao Gestor SAJ, consolidadas para a Softplan</p>
+  <p class="disclaimer">Conteúdo atualizado até 25/04/2026.</p>
+  <div class="criterio"><strong>Critérios:</strong> <span style="color:#fca5a5">Falha</span> = sistema não entrega o prometido ou cria risco processual. <span style="color:#bfdbfe">Melhoria</span> = evolução ou funcionalidade nova. <span style="color:#ddd6fe">Configuração</span> = ajuste de parametrização. <span style="background:#ffedd5;color:#9a3412;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600">Integração</span> = depende da Softplan Tribunais/TJMS. <span style="background:#cffafe;color:#155e75;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600">Grupo de Trabalho</span> = item levantado em reunião do GT. <span style="background:#16a34a;color:white;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600">✓ Resolvido</span> = correção implementada. Contagem considera <strong>solicitantes únicos</strong>.</div>
+  <div class="stats">
+    <div class="stat clickable" data-action="filter-all"><div class="label">Solicitações mapeadas</div><div class="value" id="stat-total">49</div></div>
+    <div class="stat clickable" data-action="filter-categoria" data-value="Melhoria"><div class="label">Melhorias</div><div class="value" id="stat-melhoria">33</div></div>
+    <div class="stat clickable" data-action="filter-categoria" data-value="Falha"><div class="label">Falhas</div><div class="value" id="stat-falha">13</div></div>
+    <div class="stat clickable" data-action="filter-categoria" data-value="Configuração"><div class="label">Configurações</div><div class="value" id="stat-config">3</div></div>
+    <div class="stat clickable" data-action="filter-status" data-value="resolvido"><div class="label">Resolvidas</div><div class="value" id="stat-resolvido">6</div></div>
+    <div class="stat clickable" data-action="filter-status" data-value="pendente"><div class="label">Pendentes</div><div class="value" id="stat-pendente">43</div></div>
+    <div class="stat clickable" data-action="tab-colegas"><div class="label">Colegas</div><div class="value" id="stat-colegas">14</div></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="priorizacao">Priorização GT</button>
+  <button class="tab" data-tab="lista">Lista detalhada</button>
+  <button class="tab" data-tab="ranking">Mais solicitadas</button>
+  <button class="tab" data-tab="colegas">Por colega</button>
+  <button class="tab" data-tab="modulos">Por módulo</button>
+</div>
+
+<div id="tab-lista" class="hidden">
+  <div class="controls">
+    <div class="control-group">
+      <label for="f-busca">Busca (título ou descrição)</label>
+      <input type="text" id="f-busca" placeholder="Digite para filtrar...">
+    </div>
+    <div class="control-group">
+      <label for="f-categoria">Categoria</label>
+      <select id="f-categoria"><option value="">Todas</option><option value="Melhoria">Melhoria</option><option value="Falha">Falha</option><option value="Configuração">Configuração</option></select>
+    </div>
+    <div class="control-group">
+      <label for="f-modulo">Módulo</label>
+      <select id="f-modulo"><option value="">Todos</option></select>
+    </div>
+    <div class="control-group">
+      <label for="f-colega">Solicitante</label>
+      <select id="f-colega"><option value="">Todos</option></select>
+    </div>
+    <div class="control-group">
+      <label for="f-integracao">Integração</label>
+      <select id="f-integracao"><option value="">Todos</option><option value="sim">Só com integração</option><option value="nao">Sem integração</option></select>
+    </div>
+    <div class="control-group">
+      <label for="f-origem">Origem</label>
+      <select id="f-origem"><option value="">Todas</option><option value="email">Email</option><option value="gt">Grupo de Trabalho</option></select>
+    </div>
+    <div class="control-group">
+      <label for="f-status">Status</label>
+      <select id="f-status"><option value="">Todos</option><option value="pendente">Pendentes</option><option value="resolvido">Resolvidas</option></select>
+    </div>
+    <div class="control-group">
+      <label for="f-ordem">Ordenar por</label>
+      <select id="f-ordem"><option value="freq-desc">Mais pedidos</option><option value="freq-asc">Menos pedidos</option><option value="recente">Mais recentes</option><option value="antigo">Mais antigas</option><option value="titulo">Título (A-Z)</option></select>
+    </div>
+    <div class="control-group"><label>&nbsp;</label><button class="btn-clear" id="btn-clear">Limpar filtros</button></div>
+  </div>
+  <div class="summary-bar">
+    <div><span id="result-count">49</span> solicitações mostradas</div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot falha"></span>Falha</span>
+      <span class="legend-item"><span class="legend-dot melhoria"></span>Melhoria</span>
+      <span class="legend-item"><span class="legend-dot configuracao"></span>Configuração</span>
+    </div>
+  </div>
+  <div id="cards-container"></div>
+</div>
+
+<div id="tab-ranking" class="hidden">
+  <div class="summary-bar"><div><strong>Top solicitações</strong> - ranking por número de solicitantes únicos</div></div>
+  <div class="ranking-filters" id="ranking-filters">
+    <button class="ranking-filter-btn active" data-rfilter="">Todas</button>
+    <button class="ranking-filter-btn" data-rfilter="Melhoria">Melhorias</button>
+    <button class="ranking-filter-btn" data-rfilter="Falha">Falhas</button>
+    <button class="ranking-filter-btn" data-rfilter="Configuração">Configurações</button>
+  </div>
+  <div id="ranking-container"></div>
+</div>
+
+<div id="tab-colegas" class="hidden">
+  <div class="summary-bar"><div><strong>Participação por colega</strong> - clique no nome do colega para ver suas solicitações na lista detalhada</div></div>
+  <div id="colegas-container"></div>
+</div>
+
+<div id="tab-modulos" class="hidden">
+  <div class="summary-bar"><div><strong>Distribuição por módulo</strong> - clique em um módulo para filtrar a lista detalhada</div></div>
+  <div class="module-chart" id="modulos-container"></div>
+</div>
+
+<div id="tab-priorizacao">
+  <div class="priorizacao-intro">
+    <strong>Priorização do Grupo de Trabalho.</strong> Classifique cada melhoria pendente como <strong>Crítica, Alta, Média ou Baixa</strong> (máximo 3 itens em cada uma dessas classificações, exigindo trade-offs conscientes) ou no <strong>Backlog</strong> (sem limite, para itens pertinentes, mas que não cabem no top 12 e não serão priorizados no momento). Use <strong>Descartar</strong> para itens que não devam ser priorizados. Além dos botões, é possível arrastar o card com o mouse e soltar em outra classificação, e também reordenar dentro da mesma classificação arrastando o card para a posição desejada. A posição (#1, #2, ...) também é registrada. Quando terminar, identifique-se no campo abaixo e clique em <strong>Exportar votos (.json)</strong> para envio do arquivo no grupo de whatsapp. Use <strong>Imprimir / Salvar PDF</strong> para registro pessoal da sua classificação. Apenas Melhorias pendentes entram na priorização; falhas devem ser corrigidas pela Softplan independentemente do cronograma de melhorias.
+  </div>
+  <div class="priorizacao-controls">
+    <div class="priorizacao-row">
+      <input type="text" class="votante-input" id="votante-nome" placeholder="Seu nome (obrigatório para exportar)">
+      <label class="toggle-only-pending"><input type="checkbox" id="toggle-only-pending"> Mostrar apenas não classificadas</label>
+    </div>
+    <div class="priorizacao-row">
+      <div class="priorizacao-stats" id="priorizacao-stats"></div>
+    </div>
+    <div class="priorizacao-row hidden" id="priorizacao-warning-row">
+      <div class="priorizacao-warning" id="priorizacao-warning"></div>
+    </div>
+    <div class="priorizacao-row">
+      <div class="priorizacao-actions">
+        <button class="btn-action btn-export" id="btn-export-json">⬇ Exportar votos (.json)</button>
+        <button class="btn-action btn-print" id="btn-print-pdf">🖨 Imprimir / Salvar PDF</button>
+        <button class="btn-action btn-import" id="btn-import-json">⬆ Importar votos (.json)</button>
+        <button class="btn-action btn-clear-votes" id="btn-clear-votes">Limpar meus votos</button>
+        <input type="file" id="file-import" accept=".json,application/json" style="display:none">
+      </div>
+    </div>
+  </div>
+  <div class="priorizacao-print-header">
+    <h2>Priorização SAJ Defensorias - Grupo de Trabalho</h2>
+    <div class="meta" id="print-meta"></div>
+  </div>
+  <div id="priorizacao-container"></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header" id="modal-header">
+      <div>
+        <h2 id="modal-title">Título</h2>
+        <div class="subtitle" id="modal-subtitle">Subtítulo</div>
+      </div>
+      <button class="modal-close" id="modal-close">X</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const emails = {
+  "e01": {sender: "Amanda Gabriela Silva Nassaro", senderEmail: "anassaro@defensoria.ms.def.br", date: "30/03/2026 16:25", subject: "Errata: Erros", attachments: ["SUGESTÕES - PARTE 2.docx (2 MB)"], body: `Boa tarde,\n\nApenas para registro de correção: quanto ao erro mencionado no processo 0800062-84.2026.8.12.0034 tem-se que ocorreu o "502 Bad Gateway" mas a peça caiu no processo, porém houve um processo, que até usei no curso para novos servidores, que possuía o mesmo erro, mas a peça não tinha caído no processo, mas que por falha na hora de salvar as imagens, juntei a errada. Consigno apenas para análise junto a empresa contratada, pois são erros que podem trazer prejuízo a prazos. Ocorrendo novamente comunicarei.\n\nAtenciosamente,\n\nAmanda Gabriela Silva Nassaro\nDefensora Pública`},
+  "e02": {sender: "Amanda Gabriela Silva Nassaro", senderEmail: "anassaro@defensoria.ms.def.br", date: "30/03/2026 16:12", subject: "Erros", attachments: ["SUGESTÕES - PARTE 2.docx (2 MB)"], body: `Boa tarde,\n\nSegue anexo mais algumas das funcionalidades que percebo imprescindíveis, mas principalmente a constatação de erros que podem trazer prejuízos aos assistidos ante a ausência da petição no prazo legal.\n\nAtenciosamente,\nAmanda Gabriela Silva Nassaro\nDefensora Pública\n\n--- CONTEÚDO DO ANEXO (SUGESTÕES - PARTE 2.docx) ---\n\nSUGESTÕES:\n\n- Buscar peças já feitas por uma palavra chave ou data como é possível por meio do gerenciador de arquivos\n\n- Até no manual diz que terá que fazer um a um. E pede senha para cada protocolo.\n\n- Os dois foram feitos SAJDef e não saiu do SAJTJMS\n\n- Se vou analisar os feitos da etiqueta quando retorno nos prazos dá erro.\n\n- NÃO ESTAVAM SAJDEF\n\n- CRIMINAL AQUIDAUNA – FEZ SAJDEF E NÃO SAIU SAJ TJMS\n\n- ERROS NO PETICIONAMENTO:\nApenas o primeiro de fato não caiu no processo a peça. Erro: 502 Bad Gateway`},
+  "e03": {sender: "Danilo Iano Shiroma", senderEmail: "", date: "10/03/2026 17:16", subject: "ENC: SAJ defensoria - Solicitações", attachments: [], body: `Boa tarde!\n\nReitero a solicitação no sentido de configurar o conflito para apontar a suspeita somente nos casos de processos com Defensorias atuando por partes adversas (atualmente, o critério do sistema é a justiça gratuita), evitando gerar o falso conflito.\n\nO número excessivo de falso conflito compromete o trabalho.\n\nAtenciosamente,\nDanilo Shiroma\nDefensor Público\n\n[reiteração do email de 06/02/2026]`},
+  "e04": {sender: "Danilo Iano Shiroma", senderEmail: "", date: "23/02/2026 13:36", subject: "URGENTE - Não localização dos processos de conflito do SAJ defensoria", attachments: ["WhatsApp Image - chamado helpdef"], body: `Boa tarde!\n\nCom urgência, solicito as providências no sentido de resolver a solicitação do helpdef meu assessor Davi (em anexo).\n\nAtenciosamente,\nDanilo Shiroma\nDefensor Público\n\n--- CONTEÚDO DO ANEXO (chamado helpdef Davi Da Silva Sousa - 20/02/2026) ---\nOs processos abaixo não foram encontrados no SAJ DEF, apesar de constar certidão informando que o processo foi remetido ao sistema da DPE. Nos casos de conflito, foi realizado contato com a DPE substituta onde informou que a configuração foi realizada. No entanto, a ausência dos processos na fila da 2 DPE permanece.\n\n20/02 - 0800256-16.2022.8.12.0005 - 1 DPE Aquidauana\n20/02 - 0803701-37.2025.812.0005 - 1 DPE Aquidauana\n20/02 - 0802783-33.2025 - 1 DPE Aquidauana\n20/02 - 0900502-49.2024 - 1 DPE Aquidauana`},
+  "e05": {sender: "Elisiane Cristina Boco do Rosario", senderEmail: "", date: "20/02/2026 14:49", subject: "Sugestão", attachments: [], body: `Meu assessor cadastrou uma petição intermediária. Ao conferir foi necessário ajustes. Então cliquei em remeter ao assessor. O processo foi para fila do assessor, mas continuou na fila de petições intermediárias. Acredito que isso possa gerar muita confusão com o fluxo de petições. Imagine que eu tenha 10 petições intermediárias cadastradas e vou conferindo, quando eu remeto para o assessor, no meu entender, ela deveria sair da fila de petições intermediárias para não confundir com as demais petições que eu ainda não conferi.\n\nDe qualquer forma fica minha sugestão.\n\nAtenciosamente,\nElisiane`},
+  "e06": {sender: "Janaína De Araújo Sant'Ana", senderEmail: "", date: "10/02/2026 18:15", subject: "FICHAS DO SAJ-DEFENSORIAS", attachments: [], body: `Boa tarde,\n\nObservei que as fichas do SAJ - Defensorias não abrem todos os processos que estão marcados com elas. De acordo com o sistema, é preciso escolher uma fila e depois clicar na ficha (ex. Urgente). Nesse caso serão mostrados todos os processos com a ficha "urgente" da fila escolhida, mas não são mostrados todos os processos urgentes de todas as filas. Isso obriga o Defensor a acessar uma por uma das filas, o que é contraprodutivo.\n\nO ideal seria que ao clicar na ficha "urgente" o sistema mostrasse todos os processos que possuem essa marcação, independentemente da fila que estão.\n\nAtt,\nJanaína de Araújo Sant'Ana Andrade`},
+  "e07": {sender: "Danilo Iano Shiroma", senderEmail: "", date: "10/02/2026 17:36", subject: "URGENTE - SAJ defensoria - e-proc", attachments: [], body: `Boa tarde!\n\nConsiderando a iminência da implantação do EPROC no Juizado Especial, solicito, com urgência, a integração do SAJ defensoria com o referido sistema.\n\nVer despacho do Juiz do Juizado de Aquidauana, no qual denota a fase de curso do EPROC.\n\nAtenciosamente,\nDanilo Shiroma\nDefensor Público`},
+  "e08": {sender: "Danilo Iano Shiroma", senderEmail: "", date: "10/02/2026 17:30", subject: "SAJ defensoria - Sugestões / Solicitações", attachments: [], body: `Boa tarde!\n\nSolicito as seguintes alterações no SAJ defensoria:\n\n1. Disponibilizar a emissão da pauta de audiências, em formato relatório;\n\n2. Disponibilizar o cálculo de alimentos no sistema;\n\n3. Melhorar a internet de Aquidauana;\n\n4. Possibilitar configurar o conflito, emitir documentos etc. do card localizado pela pesquisa (o sistema localiza, mas não permite).\n\nAtenciosamente,\nDanilo Shiroma\nDefensor Público`},
+  "e09": {sender: "Danilo Iano Shiroma", senderEmail: "", date: "06/02/2026 17:48", subject: "SAJ defensoria - Solicitações", attachments: [], body: `Através do presente, quanto ao SAJ defensoria, solicito as providências necessárias para:\n\n1. Configurar o conflito para apontar a suspeita somente nos casos de processos com Defensorias atuando por partes adversas;\n\n2. Habilitar no Sistema para busca de processos pelo nome, CPF etc, possibilitando consulta dos processos arquivados etc;\n\n3. Em Aquidauana, mudar a lotação do Juizado A e Juizado B para Juizado Cível e Juizado Criminal;\n\n4. Habilitar o gerenciador no sistema (o mesmo do SAJ tribunal).\n\nAtenciosamente,\nDanilo Shiroma\nDefensor Público`},
+  "e10": {sender: "Danilo Iano Shiroma", senderEmail: "", date: "06/02/2026 17:40", subject: "URGENTE - Prazo do SAJ Defensoria", attachments: [], body: `Prezado(a) Senhor(a),\n\nAtravés do presente, solicito urgência para solucionar uma falha no SAJ defensoria, pois o referido sistema não está calculando os prazos e nem informando prazos de vencimento, tornando a opção "ordenar por prazos" inócua, assim como a fila "prazos em aberto" fica sem funcionalidade.\n\nSolicito a correção do sistema, pois há risco iminente de perdas de prazos.\n\nAtenciosamente,\nDanilo Shiroma\nDefensor Público`},
+  "e11": {sender: "Janaína De Araújo Sant'Ana", senderEmail: "", date: "06/02/2026 08:45", subject: "PRAZOS NO SAJ DEFENSORIAS", attachments: [], body: `Bom dia,\n\nVerifiquei que o SAJ-Defensorias não está contando prazos. Após 10 dias, ele mantém o processo na fila "prazos por abrir" com a observação "expirado em XX/XX/XX". Assim, a fila "prazos em aberto" está sem uso.\n\nSugiro o aperfeiçoamento do sistema no que diz respeito aos prazos, pois a contagem de prazos é imprescindível para evitar prejuízos aos assistidos.\n\nAtt,\nJanaína de Araújo Sant'Ana Andrade`},
+  "e12": {sender: "Sara Curcino - Defensora Pública", senderEmail: "", date: "05/02/2026 09:09", subject: "SUGESTÃO MELHORIA - SAJ DEFENSORIA - FILTRO POR PERÍODO", attachments: [], body: `Olá!\n\nÉ necessário criar filtro de acesso aos autos por período, como hoje é insuficiente (mais antigas e mais recentes). Por período é importante para gestão do trabalho, principalmente para controle dos prazos.`},
+  "e13": {sender: "Janaína De Araújo Sant'Ana", senderEmail: "", date: "04/02/2026 18:02", subject: "SAJ DEFENSORIAS - PRAZOS", attachments: [], body: `Boa tarde,\n\nO SAJ - Defensorias não está calculando os prazos e nem informando prazos de vencimento.\n\nSolicito a correção do sistema nesse sentido, pois há risco iminente de perdas de prazos.\n\nAtt,\nJanaína de Araújo Sant'Ana Andrade`},
+  "e14": {sender: "Paulo Henrique Americo Lucindo", senderEmail: "", date: "04/02/2026 14:13", subject: "Falhas Saj Defensorias", attachments: ["FALHAS SAJ DEFENSORIA.pdf (238 KB)"], body: `Prezados,\n\nSeguem em anexo algumas das falhas que identifiquei ao utilizar o sistema.\n\n--- CONTEÚDO DO ANEXO (FALHAS SAJ DEFENSORIA.pdf) ---\n\nFALHA 1: INCONSISTÊNCIA NO PROCEDIMENTO DE PROTOCOLO - Em um dia, 12 manifestações liberadas; 7 apresentaram erro no protocolo mas todas foram protocolizadas. Conferência manual.\n\nFALHA 2: Ao iniciar o protocolo (ex.: 0901562-29.2026.8.12.0800), sistema registra ciência da intimação mas apresenta erro no protocolo. Prazo flui sem protocolo realizado.\n\nFALHA 3: Ausência de movimentação automática do processo no organizador de prazos. Após 10 dias, permanece em "prazos por abrir" com "prazo para ciência expirado".\n\nFALHA 4: Sigilo externo - sistema capta intimação e contabiliza prazo, mas impede abertura do processo. Ex.: 0900959-41.2025.8.12.0007, 0801754-39.2025.8.12.0007.\n\nFALHA 5: Protocolo feito no SAJ Def, mas intimações não baixadas no SAJ TJ. Dezenas permanecem ativas.\n\nFALHA 6: SAJ Defensorias não realiza contagem do prazo indicado pelo cartório.\n\nFALHA 7: Loop "calculando prazo de ciência" sem conclusão, depois "prazo de ciência expirado".\n\nFALHA 8: Excesso de e-mails ao institucional (cada protocolo gera email).`},
+  "e15": {sender: "Janaína De Araújo Sant'Ana", senderEmail: "", date: "02/02/2026 16:53", subject: "SAJ DEFENSORIAS - VARAS DOS JUIZADOS ESPECIAIS DE AQUIDAUANA", attachments: ["Image to PDF 20260202.pdf (2 MB)"], body: `Boa tarde,\n\nReitero sugestão para correção dos Juizados Especiais na comarca de Aquidauana. Consta no SAJ-Defensorias "Juizados A" e "Juizados B". Contudo, na Defensoria Pública de Aquidauana existem duas Varas de Juizados divididas por matéria: Vara do Juizado Cível e Vara do Juizado Criminal.\n\nNão existem duas Varas de Juizados Mistos em Aquidauana como está sendo feita a divisão atual no SAJ-Defensorias.\n\nAtt,\nJanaína de Araújo Sant'Ana Andrade`},
+  "e16": {sender: "Amanda Gabriela Silva Nassaro", senderEmail: "anassaro@defensoria.ms.def.br", date: "28/01/2026 13:45", subject: "Sugestões SAJ Defensoria", attachments: ["SUGESTÕES SAJ DEFENSORIA.docx (737 KB)"], body: `Boa tarde,\n\nAnalisando o SAJ Defensoria senti a falta de várias funcionalidades que tínhamos no SAJ Tribunais.\n\n--- CONTEÚDO DO ANEXO (SUGESTÕES SAJ DEFENSORIA.docx - 8 páginas) ---\n\n- Leitura em lote como ocorre SAJ TJ, atalho F12\n- Calculadora de prazo do TJMS\n- Editor de texto: régua, rodapé automático, quebra de página, botão F11, editor de processo em lote\n- Pauta de audiência com ciência da Defensoria\n- Indicação do número da página no sumário\n- Árvore de documentos categorizada\n- Tarjas dos processos (Réu Preso etc.)`},
+  "e17": {sender: "Janaína De Araújo Sant'Ana", senderEmail: "", date: "28/01/2026 17:01", subject: "SUGESTÕES - SAJ DEFENSORIAS", attachments: [], body: `Boa tarde,\n\nMelhorias necessárias:\n\n1) Não há assinatura nem peticionamento em bloco;\n2) Processo não apresenta páginas;\n3) Editor de texto carece de formatação;\n4) Falsos conflitos constantes;\n5) Conflito com advogado não pode ser finalizado (incluir opção "advogado" ou "sem patrono");\n6) Juizados de Aquidauana mal definidos;\n7) Sistema não separa processos por etiqueta;\n8) Não fornece prazos de vencimento em local visível.\n\nAtt,\nJanaína de Araújo Sant'Ana Andrade`},
+  "e18": {sender: "Matheus Paulo de Andrade", senderEmail: "", date: "30/01/2026 14:16", subject: "SAJ Defensoria - necessidade de melhorias", attachments: [], body: `Prezados(as),\n\nDificuldades na atuação na Defensoria Pública Criminal de Amambai:\n\n- Novo SAJ não exibe tarjas do TJ (réu preso);\n- Critério de conflito inadequado para Criminal (corréus sem conflito);\n- Falhas na integração SAJ TJ (nem todos processos chegam);\n- Editor de texto limitado (fonte mínima 11, falta recuo);\n- Sistema não permite manifestações em bloco;\n- Observações precisam ficar visíveis no layout do processo.\n\nAtt,\nMatheus Paulo de Andrade`},
+  "e19": {sender: "Danilo Iano Shiroma", senderEmail: "", date: "27/01/2026 14:08", subject: "Dúvida SAJ Defensoria", attachments: [], body: `Considerando que o Dr. Pedro ficou de verificar a possibilidade de disponibilizar o gerenciador de arquivos para fins de relatório mensal de atividades, solicito as informações sobre o assunto.\n\nSaliento que o gerenciador de arquivos é utilizado para fazer o referido relatório.\n\nAtenciosamente,\nDanilo Shiroma`},
+  "e20": {sender: "Danilo Iano Shiroma", senderEmail: "", date: "27/01/2026 13:55", subject: "Sugestão - SAJ Defensoria", attachments: [], body: `Após o curso de capacitação do SAJ Defensoria (23/01/2026):\n\nTRIAGEM, EMISSÃO E ASSINATURA EM BLOCO: SAJ Tribunal possibilita triagem, elaboração e assinatura em bloco. SAJ Defensoria não possui. Necessário exibir observação no card e permitir elaboração/assinatura em bloco (60 ciências de uma vez etc.).\n\nORGANIZAÇÃO DOS CARDS: padrão SAJ Tribunal (data de entrada, vencimento, observação).\n\nEDITOR DE TEXTO: OpenOffice como solução (já usado pelo SAJ Tribunal).\n\nGERENCIADOR DE ARQUIVOS: imprescindível para relatório mensal.\n\nOUTROS: exibição do processo na segunda tela com nº da página, relatório da pauta de audiências.\n\nDanilo Iano Shiroma\n2ª Defensoria Pública Cível de Aquidauana`},
+  "e21": {sender: "Stephany Oliveira Giardini Fonseca", senderEmail: "", date: "26/01/2026 15:27", subject: "Sugestões para o SAJ defensoria", attachments: [], body: `1- Colocar um visualizador de página e petição na lateral (a árvore com as páginas)\n\n2- Colocar um filtro de data de vencimento (vencimento diário)\n\n3- Colocar a possibilidade de editar as etiquetas, para que os recados fiquem visuais\n\n4- A implementação da régua na criação do modelo`},
+  "e22": {sender: "Sara Curcino - Defensora Pública", senderEmail: "", date: "26/01/2026 13:37", subject: "SUGESTÕES DE MELHORIAS NO SAJ DEFENSORIA", attachments: [], body: `- HISTÓRICO DO OBJETO NO FLUXO;\n- CAIXA DE OBSERVAÇÃO APARENTE;\n- MODO ESCURO GLOBAL E INDIVIDUAL;\n- POPUP PERSISTENTE EM CASO DE CONFLITO;\n- VINCULAÇÃO DO CÁLCULO DO PRAZO COM CALCULADORA DO TJMS;\n- DISPONIBILIZAÇÃO DE CALCULADORA DE PRAZO E VALORES;\n- AUTOTEXTO NO EDITOR COM TECLA DE ATALHO;\n- AUTOTEXTO EM NÍVEIS (GLOBAL/GRUPO/INDIVIDUAL);\n- CHAT DE SUPORTE COM SOFTPLAN NA PLATAFORMA;\n- CIÊNCIA AUTOMÁTICA EM BLOCO.`},
+  "e23": {sender: "Lucas Lima Gomes", senderEmail: "lucaslimagomess10@gmail.com", date: "23/01/2026 15:21", subject: "Re: SUGESTÕES PARA O SAJ - DEFENSORIAS", attachments: [], body: `- FERRAMENTA DE CHAT DE SUPORTE COM A SOFTPLAN NA PRÓPRIA PLATAFORMA.\n\n[adições ao email anterior com sugestões]`},
+  "e24": {sender: "Lucas Lima Gomes", senderEmail: "lucaslimagomess10@gmail.com", date: "23/01/2026 15:21", subject: "SUGESTÕES PARA O SAJ - DEFENSORIAS", attachments: [], body: `- MODO ESCURO GLOBAL E INDIVIDUAL;\n- POPUP PERSISTENTE EM CONFLITO;\n- CÁLCULO DE PRAZO COM CALCULADORA TJMS;\n- HISTÓRICO DO OBJETO NO FLUXO;\n- AUTOTEXTO COM TECLA DE ATALHO;\n- AUTOTEXTO EM NÍVEIS (GLOBAL/GRUPO/INDIVIDUAL);\n- CIÊNCIA AUTOMÁTICA EM BLOCO;\n- INTEGRAÇÃO COM IA (COPILOT);\n- PÁGINA WEB COM STATUS DAS SUGESTÕES.`},
+  "e25": {sender: "Matheus Paulo de Andrade", senderEmail: "", date: "23/01/2026 14:41", subject: "Sugestões SAJ Defensoria DPEMS", attachments: [], body: `Boa tarde,\n\nReiterar sugestão do Defensor Danilo: as observações devem ficar aparentes no fluxo. Em defensorias de grande volume, as observações servem como triagem dos processos.\n\nAtt,\nMatheus Paulo de Andrade`},
+  "e26": {sender: "Gustavo Peres De Oliveira Terra", senderEmail: "gustavop@defensoria.ms.def.br", date: "21/01/2026 10:30", subject: "Melhorias", attachments: [], body: `Prezado,\n\nNo editor de texto do SAJ Defensoria seria muito útil constar a visualização das páginas, como ocorre no Word, ou seja, se a petição está ocupando uma ou mais páginas. Não da forma corrida como ocorre no momento.\n\nGustavo Peres de Oliveira Terra`},
+  "e27": {sender: "Raphaela da Silva Nascimento", senderEmail: "", date: "19/01/2026 16:22", subject: "Sugestão de melhoria - SAJ defensoria", attachments: [], body: `Prezado Comitê Gestor\n\nSugiro a implementação de funcionalidade que permita a abertura automática dos autos processuais em um segundo monitor, em substituição ao atual comportamento de abertura em nova aba.\n\nTal aprimoramento otimiza a utilização do sistema e a produtividade em atividades que demandam consulta simultânea.\n\nDra Raphaela da Silva Nascimento`},
+  "e28": {sender: "Raphaela da Silva Nascimento", senderEmail: "", date: "19/01/2026 15:43", subject: "Assinatura em Lote - sugestão", attachments: [], body: `Prezado Comitê Gestor,\n\nSugiro a inclusão da funcionalidade de assinatura em lote das petições e manifestações já inseridas no marcador "Peticionar". Funcionalidade semelhante já existia no SAJ TJ.\n\nDra Raphaela da Silva Nascimento`},
+  "e29": {sender: "Gustavo Peres De Oliveira Terra", senderEmail: "gustavop@defensoria.ms.def.br", date: "15/01/2026 10:26", subject: "Sugestão de melhoria", attachments: [], body: `Prezados membros do Comitê Gestor:\n\nCom frequência temos muitos processos que são de atribuição da Central de Honorários (FUNADEP).\n\nPor isso, seria muito útil se o SAJ Defensorias permitisse A REMESSA EM LOTE desses processos ao FUNADEP.\n\nGustavo Peres de Oliveira Terra`},
+  "eGS": {sender: "Pedro de Luna Souza Leite (Gestor SAJ Defensorias)", senderEmail: "gestorsaj@defensoria.ms.def.br", date: "24/04/2026", subject: "Inclusão pelo Gestor SAJ - análise interna", attachments: [], body: `Solicitação incluída pelo Gestor SAJ a partir de análise interna/feedback consolidado, não vinculada a um email específico da caixa de entrada.\n\nPonto mapeado para repasse à Softplan.`},
+  "eGT": {sender: "Grupo de Trabalho - Reunião de 24/04/2026", senderEmail: "", date: "24/04/2026 15:09", subject: "Reunião do Grupo de Trabalho para Acompanhamento e Aprimoramento do SAJ Defensorias", attachments: ["Ata_Reuniao_GT_SAJ_Defensorias_2026-04-24.md"], body: `Solicitação registrada durante a reunião do Grupo de Trabalho para Acompanhamento e Aprimoramento do Sistema SAJ Defensorias, realizada em 24/04/2026 (início aproximadamente às 15:09).\n\nParticipantes: Pedro de Luna Souza Leite, Marcelo Muccillo (Diretor da STI), Henrique Pagliari Brun (STI - Suporte), Alain Gabriel Caceres Alvarez (STI - Desenvolvimento), Amanda Gabriela Silva Nassaro, Marcel Antão de Macedo, Marcos Braga da Fonseca, Paulo Henrique Américo Lucindo, Leonardo Gelatti Backes (representando a ADEP).\n\nA ata completa da reunião encontra-se disponível no arquivo em anexo.`}
+};
+
+const dados = {
+  "solicitacoes": [
+    {"id":1,"titulo":"Calcular/contar prazos e informar vencimento","categoria":"Falha","modulo":"Prazos","integracao":true,"resolvido":true,"notaResolucao":"Correção implementada pelo TJMS para passar a enviar os prazos processuais a partir de 22/04/2026.","descricao":"Sistema não calcula prazos nem informa datas de vencimento. 'Ordenar por prazos' inócua. Fila 'prazos em aberto' sem funcionalidade. Após 10 dias mantém o processo em 'prazos por abrir' com 'expirado em XX/XX/XX', sem realocar para 'prazos abertos'. Ignora o prazo indicado pelo cartório. Não há local visível específico para o vencimento. Envolve integração com SAJ TJ.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-02-06","emailId":"e10"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-02-06","emailId":"e11"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-02-04","emailId":"e13"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-01-28","emailId":"e17"},{"nome":"Paulo Henrique Americo Lucindo","data":"2026-02-04","emailId":"e14"}]},
+    {"id":2,"titulo":"Suspeita de conflito apenas para partes adversas","categoria":"Melhoria","modulo":"Conflito de interesses","integracao":false,"resolvido":true,"notaResolucao":"Melhoria implementada.","descricao":"Configurar conflito para apontar suspeita SOMENTE em processos com Defensorias em partes adversas. Hoje o critério é justiça gratuita, gerando falsos conflitos em excesso. Na Defensoria Criminal é comum haver corréus assistidos pela Defensoria sem qualquer conflito.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-03-10","emailId":"e03"},{"nome":"Danilo Iano Shiroma","data":"2026-02-06","emailId":"e09"},{"nome":"Matheus Paulo de Andrade","data":"2026-01-30","emailId":"e18"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-01-28","emailId":"e17"}]},
+    {"id":3,"titulo":"Assinatura e peticionamento em lote","categoria":"Melhoria","modulo":"Assinatura/Peticionamento","integracao":false,"resolvido":false,"descricao":"Elaboração e assinatura em lote de petições e manifestações (incluindo ciências em bloco - ex. 60 de uma vez, resposta à acusação, especificação de provas). SAJ TJ já tinha. Manual do novo sistema diz que precisa ser um a um e pede senha para cada protocolo, inviabilizando o fluxo.","solicitantes":[{"nome":"Raphaela da Silva Nascimento","data":"2026-01-19","emailId":"e28"},{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e20"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-01-28","emailId":"e17"},{"nome":"Matheus Paulo de Andrade","data":"2026-01-30","emailId":"e18"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-03-30","emailId":"e02"}]},
+    {"id":4,"titulo":"Observações visíveis no card/fluxo","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Campo de observações deve ficar visível diretamente no card (sem precisar clicar), servindo como triagem em defensorias de grande volume. Inclui permitir editar etiquetas para que os recados fiquem visuais, sem precisar de mural de recados.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e20"},{"nome":"Matheus Paulo de Andrade","data":"2026-01-23","emailId":"e25"},{"nome":"Matheus Paulo de Andrade","data":"2026-01-30","emailId":"e18"},{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"},{"nome":"Stephany Oliveira Giardini Fonseca","data":"2026-01-26","emailId":"e21"}]},
+    {"id":5,"titulo":"Editor de texto","categoria":"Melhoria","modulo":"Editor","integracao":false,"resolvido":false,"descricao":"Editor precisa de régua, recuo de parágrafo, quebra de página automática, fonte 8 (exigida pela Corregedoria em rodapés), rodapé automático, botão F11 do SAJ TJ (replica modelo) e visualização de páginas (como no Word, não corrida).","solicitantes":[{"nome":"Gustavo Peres De Oliveira Terra","data":"2026-01-21","emailId":"e26"},{"nome":"Stephany Oliveira Giardini Fonseca","data":"2026-01-26","emailId":"e21"},{"nome":"Matheus Paulo de Andrade","data":"2026-01-30","emailId":"e18"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-01-28","emailId":"e17"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-01-28","emailId":"e16"},{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e20"}]},
+    {"id":6,"titulo":"Autotexto/atalho no editor","categoria":"Melhoria","modulo":"Editor","integracao":false,"resolvido":false,"descricao":"Autotexto com tecla de atalho, independente de fluxo/lotação, com níveis (global/grupo/individual).","solicitantes":[{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"},{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e24"}]},
+    {"id":7,"titulo":"Não recebimento de intimações","categoria":"Falha","modulo":"Fluxo/Cards","integracao":true,"resolvido":false,"descricao":"Nem todos os processos do SAJ TJ chegam ao SAJ Defensoria. Inclui chamado helpdef de 20/02 sobre processos de conflito não encontrados. Anexo de 30/03 confirma: 'NÃO ESTAVAM SAJDEF'.","solicitantes":[{"nome":"Matheus Paulo de Andrade","data":"2026-01-30","emailId":"e18"},{"nome":"Danilo Iano Shiroma (assessor Davi)","data":"2026-02-23","emailId":"e04"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-03-30","emailId":"e02"}]},
+    {"id":8,"titulo":"Integração com EPROC","categoria":"Configuração","modulo":"Configuração","integracao":true,"resolvido":true,"notaResolucao":"Integração já habilitada.","descricao":"Integração urgente com EPROC (iminente implantação no Juizado Especial).","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-02-10","emailId":"e07"}]},
+    {"id":9,"titulo":"Exibição de tarjas","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":true,"resolvido":false,"descricao":"Novo SAJ não exibe tarjas do TJ (réu preso etc.), relevantes para priorização. Depende de desenvolvimento conjunto com SoftPlan Tribunais.","solicitantes":[{"nome":"Matheus Paulo de Andrade","data":"2026-01-30","emailId":"e18"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-01-28","emailId":"e16"}]},
+    {"id":10,"titulo":"Configuração de Juizados em Cível e Criminal","categoria":"Configuração","modulo":"Lotação","integracao":false,"resolvido":false,"descricao":"Em Aquidauana, 'Juizado A' e 'Juizado B' devem virar 'Juizado Cível' e 'Juizado Criminal' (varas distintas). Hoje processos estão misturados. Trata-se de ajuste de configuração da parametrização, não desenvolvimento.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-02-06","emailId":"e09"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-02-02","emailId":"e15"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-01-28","emailId":"e17"}]},
+    {"id":11,"titulo":"Busca de processos por dados de qualificação (nome, CPF etc.)","categoria":"Melhoria","modulo":"Consulta","integracao":true,"resolvido":false,"descricao":"Habilitar busca por nome, CPF etc., incluindo processos arquivados. Depende de desenvolvimento conjunto com TJMS, pois não está incluído no MNI.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-02-06","emailId":"e09"}]},
+    {"id":12,"titulo":"Gerenciador de arquivos","categoria":"Melhoria","modulo":"Relatórios","integracao":false,"resolvido":false,"descricao":"Habilitar o gerenciador no sistema (mesmo do SAJ tribunal), imprescindível para relatório mensal de atividades do Defensor. Deve permitir busca de peças já feitas por palavra-chave ou data.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-02-06","emailId":"e09"},{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e19"},{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e20"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-03-30","emailId":"e02"}]},
+    {"id":13,"titulo":"Ciência automática em bloco","categoria":"Melhoria","modulo":"Assinatura/Peticionamento","integracao":false,"resolvido":false,"descricao":"Ciência genérica em bloco com um clique.","solicitantes":[{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"},{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e24"}]},
+    {"id":14,"titulo":"Histórico do objeto no fluxo","categoria":"Melhoria","modulo":"Auditoria","integracao":false,"resolvido":false,"descricao":"Registro de movimentações, etiquetas, criação de arquivos, sabendo quem fez cada ação.","solicitantes":[{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"},{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e24"}]},
+    {"id":15,"titulo":"Modo escuro global e individual","categoria":"Melhoria","modulo":"Interface","integracao":false,"resolvido":false,"descricao":"Modo escuro global e individual, inclusive para o editor de texto.","solicitantes":[{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"},{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e24"}]},
+    {"id":16,"titulo":"Popup persistente para conflito","categoria":"Melhoria","modulo":"Conflito de interesses","integracao":false,"resolvido":false,"descricao":"Popup persistente (até marcação manual) em caso de conflito atribuído.","solicitantes":[{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"},{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e24"}]},
+    {"id":17,"titulo":"Calculadora de prazo integrada com TJMS","categoria":"Melhoria","modulo":"Prazos","integracao":false,"resolvido":false,"descricao":"Vinculação do cálculo do prazo fatal com a calculadora de prazo do TJMS.","solicitantes":[{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"},{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e24"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-01-28","emailId":"e16"}]},
+    {"id":18,"titulo":"Chat de suporte com Softplan na plataforma","categoria":"Melhoria","modulo":"Suporte","integracao":false,"resolvido":false,"descricao":"Chat de suporte Softplan diretamente no próprio sistema.","solicitantes":[{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"},{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e23"}]},
+    {"id":19,"titulo":"Integração com IA (Copilot)","categoria":"Melhoria","modulo":"Editor","integracao":false,"resolvido":false,"descricao":"Editor com IA (Copilot), para o qual a DPE já tem licença.","solicitantes":[{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e24"}]},
+    {"id":20,"titulo":"Página web com status das sugestões","categoria":"Melhoria","modulo":"Governança","integracao":false,"resolvido":false,"descricao":"Página com status (aceita, rejeitada, em desenvolvimento) e sistema de curtidas.","solicitantes":[{"nome":"Lucas Lima Gomes","data":"2026-01-23","emailId":"e24"}]},
+    {"id":21,"titulo":"Abertura automática em segundo monitor","categoria":"Melhoria","modulo":"Interface","integracao":false,"resolvido":true,"notaResolucao":"Melhoria implementada.","descricao":"Autos em segundo monitor (em vez de nova aba). Inclui a exibição do processo na segunda tela conforme solicitação do Danilo.","solicitantes":[{"nome":"Raphaela da Silva Nascimento","data":"2026-01-19","emailId":"e27"},{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e20"}]},
+    {"id":22,"titulo":"Remessa em lote","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Permitir remessa em lote para qualquer lotação (por exemplo, remeter em lote vários processos para o FUNADEP/Central de Honorários).","solicitantes":[{"nome":"Gustavo Peres De Oliveira Terra","data":"2026-01-15","emailId":"e29"}]},
+    {"id":23,"titulo":"Indicação de páginas no sumário/árvore","categoria":"Melhoria","modulo":"Visualização de autos","integracao":true,"resolvido":false,"descricao":"Indicação do número da página no sumário/árvore, como no SAJTJ. Necessário para identificar referências como 'manifeste-se sobre certidão de fl. 30'. Inclui a exibição do número da página na segunda tela. Envolve desenvolvimento conjunto com Softplan Tribunais.","solicitantes":[{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-01-28","emailId":"e16"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-01-28","emailId":"e17"},{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e20"}]},
+    {"id":24,"titulo":"Exibição de todas as intimações etiquetadas (reativação do organizador 'A Fazer')","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Ao clicar na etiqueta, o sistema deveria mostrar todas as intimações etiquetadas, independentemente do organizador onde se encontram. Para isso, foi pedido à Softplan a reativação do organizador 'A Fazer' - desativado anteriormente por problemas de carregamento - de modo a permitir filtragem ampla por etiqueta sem perder os filtros específicos por fila.","solicitantes":[{"nome":"Janaína De Araújo Sant'Ana","data":"2026-02-10","emailId":"e06"},{"nome":"Janaína De Araújo Sant'Ana","data":"2026-01-28","emailId":"e17"},{"nome":"Pedro de Luna Souza Leite","data":"2026-04-24","emailId":"eGT"}]},
+    {"id":25,"titulo":"Filtro por data de vencimento/período","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Filtro de vencimento diário (ex.: 'vence no dia 30') e por período. Hoje só há 'mais antiga' e 'mais recente'.","solicitantes":[{"nome":"Sara Curcino","data":"2026-02-05","emailId":"e12"},{"nome":"Stephany Oliveira Giardini Fonseca","data":"2026-01-26","emailId":"e21"}]},
+    {"id":26,"titulo":"Pauta de audiências","categoria":"Melhoria","modulo":"Relatórios","integracao":true,"resolvido":false,"descricao":"Emissão da pauta em formato relatório, com ciência da Defensoria independente de cadastro como parte. Depende de integração com TJMS.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-02-10","emailId":"e08"},{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e20"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-01-28","emailId":"e16"}]},
+    {"id":27,"titulo":"Calculadora de valores judiciais","categoria":"Melhoria","modulo":"Ferramentas","integracao":false,"resolvido":false,"descricao":"Disponibilizar calculadora para diversos cálculos judiciais (alimentos, correção monetária e juros, honorários etc.).","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-02-10","emailId":"e08"},{"nome":"Sara Curcino","data":"2026-01-26","emailId":"e22"}]},
+    {"id":28,"titulo":"Card localizado pela pesquisa deve permitir ações","categoria":"Melhoria","modulo":"Consulta","integracao":false,"resolvido":false,"descricao":"Permitir configurar conflito, emitir documentos etc. a partir do card localizado pela pesquisa. Hoje o sistema localiza, mas não permite ações.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-02-10","emailId":"e08"}]},
+    {"id":29,"titulo":"Petição intermediária permanece na fila após remeter","categoria":"Falha","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Ao remeter petição intermediária ao assessor, o processo vai para a fila dele mas CONTINUA na fila de petições intermediárias do Defensor.","solicitantes":[{"nome":"Elisiane Cristina Boco do Rosario","data":"2026-02-20","emailId":"e05"}]},
+    {"id":30,"titulo":"Conflito com advogado - opções ausentes","categoria":"Melhoria","modulo":"Conflito de interesses","integracao":false,"resolvido":true,"notaResolucao":"Melhoria implementada - conflito não precisa ser configurado para todas as partes.","descricao":"Incluir opção 'advogado' ou 'sem patrono' para finalizar configuração de conflito (ex.: réu citado pessoalmente, sem advogado).","solicitantes":[{"nome":"Janaína De Araújo Sant'Ana","data":"2026-01-28","emailId":"e17"}]},
+    {"id":31,"titulo":"Organização dos cards (padrão SAJ TJ)","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Organizar cards por data de entrada, vencimento e observação da fila, como ocorre no SAJ TJ.","solicitantes":[{"nome":"Danilo Iano Shiroma","data":"2026-01-27","emailId":"e20"}]},
+    {"id":32,"titulo":"Leitura em lote (F12 do SAJ TJ)","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Leitura em lote como no SAJ TJ, com atalho F12.","solicitantes":[{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-01-28","emailId":"e16"}]},
+    {"id":33,"titulo":"Erro 502 Bad Gateway ao protocolar","categoria":"Falha","modulo":"Protocolo","integracao":false,"resolvido":false,"descricao":"Erro 502 Bad Gateway durante protocolo. Às vezes a peça cai no processo, às vezes não. Risco a prazos. Diversas ocorrências documentadas no anexo SUGESTÕES - PARTE 2.","solicitantes":[{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-03-30","emailId":"e02"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-03-30","emailId":"e01"}]},
+    {"id":34,"titulo":"Erro no protocolo + peça protocolada (retrabalho)","categoria":"Falha","modulo":"Protocolo","integracao":false,"resolvido":true,"notaResolucao":"Falha corrigida.","descricao":"Sistema exibe erro mas a peça É protocolizada. Em um dia: 12 manifestações liberadas; 7 apresentaram erro e todas foram protocolizadas. Gera conferência manual de cada protocolo.","solicitantes":[{"nome":"Paulo Henrique Americo Lucindo","data":"2026-02-04","emailId":"e14"}]},
+    {"id":35,"titulo":"Ciência registrada sem protocolo (prazo corre)","categoria":"Falha","modulo":"Protocolo","integracao":false,"resolvido":false,"descricao":"Ao iniciar protocolo, sistema registra ciência da intimação (lê intimação do TJ) mas apresenta erro no protocolo. Prazo passa a fluir sem protocolo realizado. Risco processual (ex.: autos 0901562-29.2026.8.12.0800).","solicitantes":[{"nome":"Paulo Henrique Americo Lucindo","data":"2026-02-04","emailId":"e14"}]},
+    {"id":36,"titulo":"Intimações permanecem no SAJ TJ após protocolo","categoria":"Falha","modulo":"Protocolo","integracao":true,"resolvido":false,"descricao":"Protocolo feito no SAJ Def mas intimações não são automaticamente baixadas no SAJ TJ. Dezenas permanecem ativas na 'fila de intimações' do SAJ TJ. Anexo de Amanda confirma: 'fez SAJDef e não saiu SAJ TJMS'.","solicitantes":[{"nome":"Paulo Henrique Americo Lucindo","data":"2026-02-04","emailId":"e14"},{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-03-30","emailId":"e02"}]},
+    {"id":37,"titulo":"Erro na contagem do prazo de ciência automática","categoria":"Falha","modulo":"Prazos","integracao":false,"resolvido":false,"descricao":"Loop contínuo com 'calculando prazo de ciência' sem conclusão, depois 'prazo de ciência foi expirado' sem consolidação correta. Insegurança quanto ao marco inicial do prazo processual.","solicitantes":[{"nome":"Paulo Henrique Americo Lucindo","data":"2026-02-04","emailId":"e14"}]},
+    {"id":38,"titulo":"Excesso de e-mails ao email institucional","categoria":"Configuração","modulo":"Notificações","integracao":false,"resolvido":false,"descricao":"Cada protocolo gera email automático ao email institucional. Ajustar via configuração/parametrização do envio para reduzir volume e não congestionar caixa.","solicitantes":[{"nome":"Paulo Henrique Americo Lucindo","data":"2026-02-04","emailId":"e14"}]},
+    {"id":39,"titulo":"Árvore de documentos categorizada (padrão SAJ TJ)","categoria":"Melhoria","modulo":"Visualização de autos","integracao":false,"resolvido":false,"descricao":"Árvore categorizando por Decisões Interlocutórias, Certidão Cartório etc., como no SAJ TJ.","solicitantes":[{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-01-28","emailId":"e16"}]},
+    {"id":40,"titulo":"Erro ao analisar feitos da etiqueta ao retornar aos prazos","categoria":"Falha","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Ao analisar os feitos da etiqueta, ao retornar aos prazos dá erro (anexo SUGESTÕES - PARTE 2.docx).","solicitantes":[{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-03-30","emailId":"e02"}]},
+    {"id":41,"titulo":"Modo de visualização condensada do fluxo","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Disponibilizar um modo de visualização condensada (compacta) dos cards no fluxo de trabalho, reduzindo o espaço visual por card para permitir ampla visualização de muitos processos de uma só vez - útil em defensorias de grande volume.","solicitantes":[{"nome":"Pedro de Luna Souza Leite","data":"2026-04-24","emailId":"eGS"}]},
+    {"id":42,"titulo":"Filtros avançados (competência, classe/assunto, integração, vara de origem)","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Disponibilizar filtros por competência, classe processual, assunto, tipo de integração e vara judicial de origem, permitindo segmentar os processos no fluxo de trabalho por esses critérios. Depende de dados vindos da integração com o SAJ TJ.","solicitantes":[{"nome":"Pedro de Luna Souza Leite","data":"2026-04-24","emailId":"eGS"}]},
+    {"id":43,"titulo":"Integração com o SEEU","categoria":"Configuração","modulo":"Configuração","integracao":true,"resolvido":false,"descricao":"Habilitar a integração do SAJ Defensoria com o SEEU (Sistema Eletrônico de Execução Unificado), considerando a relevância para a atuação na execução penal/presídios. Já é possível habilitar a integração - basta mapear o fluxo de trabalho e configurar corretamente o sistema.","solicitantes":[{"nome":"Paulo Henrique Americo Lucindo","data":"2026-04-24","emailId":"eGT"}]},
+    {"id":44,"titulo":"Erro no peticionamento de inicial sem polo passivo","categoria":"Falha","modulo":"Protocolo","integracao":false,"resolvido":false,"descricao":"Iniciais que possuem apenas polo ativo (sem polo passivo) estavam retornando erro no peticionamento. É necessário tratar essa hipótese para não bloquear o protocolo.","solicitantes":[{"nome":"Marcos Braga da Fonseca","data":"2026-04-24","emailId":"eGT"}]},
+    {"id":45,"titulo":"Inconsistência de token (e-SAJ) na assinatura/liberação de peça","categoria":"Falha","modulo":"Protocolo","integracao":false,"resolvido":false,"descricao":"No momento da assinatura, a peça apresenta mensagem de impossibilidade e desaparece visualmente, gerando retrabalho - a equipe passou a salvar minutas fora do sistema. Provável inconsistência de token relacionada ao e-SAJ; em regra a peça permanece salva como PDF nos autos internos. Solução técnica é aplicada caso a caso pela STI nos computadores via HelpDef.","solicitantes":[{"nome":"Amanda Gabriela Silva Nassaro","data":"2026-04-24","emailId":"eGT"}]},
+    {"id":46,"titulo":"Mensagens de erro claras no peticionamento (com glossário)","categoria":"Falha","modulo":"Protocolo","integracao":false,"resolvido":false,"descricao":"Tornar as mensagens de erro do peticionamento autoexplicativas, indicando os campos faltantes, e disponibilizar glossário/dicionário que correlacione cada mensagem ao setor e cadastro correspondente que precisa ser ajustado para destravar.","solicitantes":[{"nome":"Marcel Antão de Macedo","data":"2026-04-24","emailId":"eGT"},{"nome":"Marcos Braga da Fonseca","data":"2026-04-24","emailId":"eGT"}]},
+    {"id":47,"titulo":"Validação de coerência entre competência, classe e assunto","categoria":"Falha","modulo":"Protocolo","integracao":false,"resolvido":false,"descricao":"Evitar combinações incoerentes entre competência, classe e assunto no peticionamento (exemplo citado na reunião: categorias incompatíveis no âmbito de ações previdenciárias).","solicitantes":[{"nome":"Marcel Antão de Macedo","data":"2026-04-24","emailId":"eGT"}]},
+    {"id":48,"titulo":"Reposicionamento de pop-up sobre o botão de assinatura","categoria":"Melhoria","modulo":"Interface","integracao":false,"resolvido":false,"descricao":"O pop-up está sendo exibido sobre o botão de assinatura, atrapalhando o fluxo. Solicitação já encaminhada à Softplan.","solicitantes":[{"nome":"Elisiane Cristina Boco do Rosario","data":"2026-04-24","emailId":"eGT"},{"nome":"Marcos Braga da Fonseca","data":"2026-04-24","emailId":"eGT"}]},
+    {"id":49,"titulo":"Destaque visual da existência de observação no card","categoria":"Melhoria","modulo":"Fluxo/Cards","integracao":false,"resolvido":false,"descricao":"Indicar visualmente, no card, a existência de observação - distinto da exibição do conteúdo da observação (já mapeada no item 'Observações visíveis no card/fluxo'). Hoje, segundo Marcos, não há sinalização clara da presença de observação.","solicitantes":[{"nome":"Marcos Braga da Fonseca","data":"2026-04-24","emailId":"eGT"}]}
+  ]
+};
+
+const ARTEFATO_VERSAO = '2026-04-26';
+const STORAGE_KEY = 'saj-gt-priorizacao-v1';
+const TIER_LIMIT = 3;
+const LIMITED_TIERS = ['P0', 'P1', 'P2', 'P3'];
+const POSITIONED_TIERS = ['P0', 'P1', 'P2', 'P3', 'BACKLOG'];
+const BADGE_TIERS = ['P0', 'P1', 'P2', 'P3'];
+const PRIO_LABEL = { P0: 'Crítica', P1: 'Alta', P2: 'Média', P3: 'Baixa' };
+const tierLabelOf = (tierId) => PRIO_LABEL[tierId] || tierId;
+
+const formatDate = (iso) => { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
+const getLatestDate = (s) => s.solicitantes.reduce((acc, cur) => cur.data > acc ? cur.data : acc, s.solicitantes[0].data);
+const getEarliestDate = (s) => s.solicitantes.reduce((acc, cur) => cur.data < acc ? cur.data : acc, s.solicitantes[0].data);
+const escapeHtml = (s) => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+const slugCategoria = (c) => c === 'Configuração' ? 'configuracao' : c.toLowerCase();
+const uniqueSolicitantes = (s) => [...new Map(s.solicitantes.map(p => [p.nome, p])).values()];
+const uniqueCount = (s) => uniqueSolicitantes(s).length;
+const fromGT = (s) => s.solicitantes.some(p => p.emailId === 'eGT');
+const fromEmail = (s) => s.solicitantes.some(p => p.emailId !== 'eGT');
+
+const modulos = [...new Set(dados.solicitacoes.map(s => s.modulo))].sort();
+const colegas = [...new Set(dados.solicitacoes.flatMap(s => s.solicitantes.map(p => p.nome)))].sort();
+
+const selModulo = document.getElementById('f-modulo');
+modulos.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; selModulo.appendChild(o); });
+const selColega = document.getElementById('f-colega');
+colegas.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; selColega.appendChild(o); });
+
+const totalResolvidas = dados.solicitacoes.filter(s => s.resolvido).length;
+document.getElementById('stat-total').textContent = dados.solicitacoes.length;
+document.getElementById('stat-melhoria').textContent = dados.solicitacoes.filter(s => s.categoria === 'Melhoria').length;
+document.getElementById('stat-falha').textContent = dados.solicitacoes.filter(s => s.categoria === 'Falha').length;
+document.getElementById('stat-config').textContent = dados.solicitacoes.filter(s => s.categoria === 'Configuração').length;
+document.getElementById('stat-resolvido').textContent = totalResolvidas;
+document.getElementById('stat-pendente').textContent = dados.solicitacoes.length - totalResolvidas;
+document.getElementById('stat-colegas').textContent = colegas.length;
+
+let rankingFilterCat = '';
+
+const switchTab = (tabName) => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  const targetTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+  if (targetTab) targetTab.classList.add('active');
+  ['lista', 'ranking', 'colegas', 'modulos', 'priorizacao'].forEach(name => {
+    document.getElementById('tab-' + name).classList.add('hidden');
+  });
+  document.getElementById('tab-' + tabName).classList.remove('hidden');
+};
+
+const clearFiltersOnly = () => {
+  document.getElementById('f-busca').value = '';
+  document.getElementById('f-categoria').value = '';
+  document.getElementById('f-modulo').value = '';
+  document.getElementById('f-colega').value = '';
+  document.getElementById('f-integracao').value = '';
+  document.getElementById('f-origem').value = '';
+  document.getElementById('f-status').value = '';
+  document.getElementById('f-ordem').value = 'freq-desc';
+};
+
+const applyCategoryFilter = (filterValue) => {
+  clearFiltersOnly();
+  if (filterValue !== 'all') document.getElementById('f-categoria').value = filterValue;
+  switchTab('lista');
+  renderCards();
+  document.querySelector('#tab-lista').scrollIntoView({behavior: 'smooth', block: 'start'});
+};
+
+const applyStatusFilter = (statusValue) => {
+  clearFiltersOnly();
+  document.getElementById('f-status').value = statusValue;
+  switchTab('lista');
+  renderCards();
+  document.querySelector('#tab-lista').scrollIntoView({behavior: 'smooth', block: 'start'});
+};
+
+const applyColegaFilter = (nome) => {
+  clearFiltersOnly();
+  document.getElementById('f-colega').value = nome;
+  switchTab('lista');
+  renderCards();
+  document.querySelector('#tab-lista').scrollIntoView({behavior: 'smooth', block: 'start'});
+};
+
+const applyModuloFilter = (modulo) => {
+  clearFiltersOnly();
+  document.getElementById('f-modulo').value = modulo;
+  switchTab('lista');
+  renderCards();
+  document.querySelector('#tab-lista').scrollIntoView({behavior: 'smooth', block: 'start'});
+};
+
+document.querySelectorAll('.stat.clickable').forEach(s => {
+  s.addEventListener('click', () => {
+    const action = s.getAttribute('data-action');
+    if (action === 'filter-all') applyCategoryFilter('all');
+    else if (action === 'filter-categoria') applyCategoryFilter(s.getAttribute('data-value'));
+    else if (action === 'filter-status') applyStatusFilter(s.getAttribute('data-value'));
+    else if (action === 'tab-colegas') {
+      switchTab('colegas');
+      document.querySelector('#tab-colegas').scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+  });
+});
+
+const buildOrigemLabel = (s) => {
+  const uniq = uniqueCount(s);
+  const sufixSol = uniq > 1 ? 's' : '';
+  const gtEntries = s.solicitantes.filter(p => p.emailId === 'eGT').length;
+  const emailEntries = s.solicitantes.length - gtEntries;
+  const parts = [];
+  if (emailEntries > 0) parts.push(`${emailEntries} email${emailEntries > 1 ? 's' : ''}`);
+  if (gtEntries > 0) parts.push('grupo de trabalho');
+  return `${uniq} solicitante${sufixSol} - ${parts.join(' + ')}`;
+};
+
+const openModal = (solicitacaoId) => {
+  const s = dados.solicitacoes.find(x => x.id === solicitacaoId);
+  if (!s) return;
+  const subtitleParts = [s.categoria, s.modulo];
+  if (s.integracao) subtitleParts.push('envolve integração');
+  if (fromGT(s)) subtitleParts.push('Grupo de Trabalho');
+  if (s.resolvido) subtitleParts.push('RESOLVIDO');
+  document.getElementById('modal-title').textContent = s.titulo;
+  document.getElementById('modal-subtitle').textContent = `${subtitleParts.join(' • ')} - ${buildOrigemLabel(s)}`;
+  document.getElementById('modal-header').className = 'modal-header' + (s.resolvido ? ' resolvido' : '');
+
+  const uniqueIds = [...new Set(s.solicitantes.map(p => p.emailId))];
+  let html = '';
+  if (s.resolvido && s.notaResolucao) {
+    html += `<div class="modal-resolucao"><div class="resolucao-title">✓ Resolvido</div>${escapeHtml(s.notaResolucao)}</div>`;
+  }
+  html += `<div class="modal-meta">${escapeHtml(s.descricao)}</div>`;
+  uniqueIds.forEach(eid => {
+    const e = emails[eid];
+    if (!e) { html += `<div class="modal-meta">Email ${eid} não encontrado</div>`; return; }
+    html += `<div class="email-block">
+      <div class="email-header">
+        <div class="email-sender">${escapeHtml(e.sender)}${e.senderEmail ? ' &lt;' + escapeHtml(e.senderEmail) + '&gt;' : ''}</div>
+        <div class="email-subject">${escapeHtml(e.subject)}</div>
+        <div class="email-meta">
+          <span><strong>Data:</strong> ${escapeHtml(e.date)}</span>
+          <span><strong>Para:</strong> Gestor SAJ Defensorias</span>
+        </div>
+        ${e.attachments && e.attachments.length ? e.attachments.map(a => `<span class="email-attachment">${escapeHtml(a)}</span>`).join(' ') : ''}
+      </div>
+      <div class="email-body">${escapeHtml(e.body)}</div>
+    </div>`;
+  });
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+const closeModal = () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', (ev) => {
+  if (ev.target.id === 'modal-overlay') closeModal();
+});
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeModal(); });
+
+const renderCards = () => {
+  const busca = document.getElementById('f-busca').value.toLowerCase();
+  const cat = document.getElementById('f-categoria').value;
+  const mod = document.getElementById('f-modulo').value;
+  const col = document.getElementById('f-colega').value;
+  const integ = document.getElementById('f-integracao').value;
+  const origem = document.getElementById('f-origem').value;
+  const status = document.getElementById('f-status').value;
+  const ordem = document.getElementById('f-ordem').value;
+
+  let filtered = dados.solicitacoes.filter(s => {
+    if (cat && s.categoria !== cat) return false;
+    if (mod && s.modulo !== mod) return false;
+    if (col && !s.solicitantes.some(p => p.nome === col)) return false;
+    if (integ === 'sim' && !s.integracao) return false;
+    if (integ === 'nao' && s.integracao) return false;
+    if (origem === 'gt' && !fromGT(s)) return false;
+    if (origem === 'email' && !fromEmail(s)) return false;
+    if (status === 'resolvido' && !s.resolvido) return false;
+    if (status === 'pendente' && s.resolvido) return false;
+    if (busca) {
+      const hay = (s.titulo + ' ' + s.descricao + ' ' + s.modulo).toLowerCase();
+      if (!hay.includes(busca)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    if (ordem === 'freq-desc') return uniqueCount(b) - uniqueCount(a);
+    if (ordem === 'freq-asc') return uniqueCount(a) - uniqueCount(b);
+    if (ordem === 'recente') return getLatestDate(b).localeCompare(getLatestDate(a));
+    if (ordem === 'antigo') return getEarliestDate(a).localeCompare(getEarliestDate(b));
+    if (ordem === 'titulo') return a.titulo.localeCompare(b.titulo, 'pt-BR');
+    return 0;
+  });
+
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+  document.getElementById('result-count').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state">Nenhuma solicitação encontrada com esses filtros.</div>';
+    return;
+  }
+
+  filtered.forEach(s => {
+    const uniq = uniqueCount(s);
+    const card = document.createElement('div');
+    card.className = 'card ' + slugCategoria(s.categoria) + (s.resolvido ? ' resolvido' : '');
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${escapeHtml(s.titulo)}</div>
+        <div class="badges">
+          ${s.resolvido ? '<span class="badge resolvido"><span class="check">✓</span> Resolvido</span>' : ''}
+          <span class="badge cat-${slugCategoria(s.categoria)}">${s.categoria}</span>
+          <span class="badge modulo">${escapeHtml(s.modulo)}</span>
+          ${s.integracao ? '<span class="badge integracao">Integração</span>' : ''}
+          ${fromGT(s) ? '<span class="badge gt">Grupo de Trabalho</span>' : ''}
+          <span class="badge count">${uniq} solicitante${uniq > 1 ? 's' : ''}</span>
+        </div>
+      </div>
+      ${s.resolvido && s.notaResolucao ? `<div class="resolucao-note"><span class="check-icon">✓</span><span>${escapeHtml(s.notaResolucao)}</span></div>` : ''}
+      <div class="card-desc">${escapeHtml(s.descricao)}</div>
+      <div class="solicitantes">
+        <div class="solicitantes-title">${buildOrigemLabel(s)}</div>
+        ${s.solicitantes.map(p => `<span class="solicitante-item"><span class="nome">${escapeHtml(p.nome)}</span> <span class="data">(${formatDate(p.data)})</span></span>`).join('')}
+      </div>
+    `;
+    card.addEventListener('click', () => openModal(s.id));
+    card.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openModal(s.id); } });
+    container.appendChild(card);
+  });
+};
+
+const renderRanking = () => {
+  const filtered = rankingFilterCat ? dados.solicitacoes.filter(s => s.categoria === rankingFilterCat) : [...dados.solicitacoes];
+  const sorted = filtered.sort((a, b) => uniqueCount(b) - uniqueCount(a));
+  const container = document.getElementById('ranking-container');
+  container.innerHTML = '';
+  if (sorted.length === 0) {
+    container.innerHTML = '<div class="empty-state">Nenhuma solicitação nesta categoria.</div>';
+    return;
+  }
+  sorted.forEach((s, i) => {
+    const pos = i + 1;
+    const uniq = uniqueCount(s);
+    const rank = document.createElement('div');
+    rank.className = 'ranking-card' + (s.resolvido ? ' resolvido' : '');
+    const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
+    const metaParts = [s.categoria, s.modulo];
+    if (s.integracao) metaParts.push('Integração');
+    if (fromGT(s)) metaParts.push('GT');
+    if (s.resolvido) metaParts.push('Resolvido');
+    rank.innerHTML = `
+      <div class="ranking-pos ${topClass}">${pos}</div>
+      <div>
+        <div class="ranking-title">${s.resolvido ? '<span class="check-inline">✓</span>' : ''}${escapeHtml(s.titulo)}</div>
+        <div class="ranking-meta">${metaParts.join(' - ')}</div>
+      </div>
+      <div class="ranking-count">${uniq}</div>
+    `;
+    rank.addEventListener('click', () => openModal(s.id));
+    container.appendChild(rank);
+  });
+};
+
+document.querySelectorAll('.ranking-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ranking-filter-btn').forEach(b => b.classList.remove('active', 'melhoria', 'falha', 'configuracao'));
+    rankingFilterCat = btn.getAttribute('data-rfilter');
+    btn.classList.add('active');
+    if (rankingFilterCat) btn.classList.add(slugCategoria(rankingFilterCat));
+    renderRanking();
+  });
+});
+
+const renderColegas = () => {
+  const counts = {};
+  dados.solicitacoes.forEach(s => {
+    const seen = new Set();
+    s.solicitantes.forEach(p => { if (!seen.has(p.nome)) { seen.add(p.nome); counts[p.nome] = (counts[p.nome] || 0) + 1; } });
+  });
+  const arr = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(...arr.map(e => e[1]));
+  const container = document.getElementById('colegas-container');
+  container.innerHTML = '';
+  arr.forEach(([nome, count]) => {
+    const row = document.createElement('div');
+    row.className = 'colaborador-bar';
+    row.setAttribute('role', 'button');
+    row.setAttribute('tabindex', '0');
+    const pct = (count / max) * 100;
+    row.innerHTML = `<div class="colaborador-name">${escapeHtml(nome)}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%">${count}</div></div>`;
+    row.addEventListener('click', () => applyColegaFilter(nome));
+    row.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); applyColegaFilter(nome); } });
+    container.appendChild(row);
+  });
+};
+
+const renderModulos = () => {
+  const counts = {};
+  dados.solicitacoes.forEach(s => { counts[s.modulo] = (counts[s.modulo] || 0) + 1; });
+  const arr = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(...arr.map(e => e[1]));
+  const container = document.getElementById('modulos-container');
+  container.innerHTML = '';
+  arr.forEach(([mod, count]) => {
+    const row = document.createElement('div');
+    row.className = 'module-row';
+    row.setAttribute('role', 'button');
+    row.setAttribute('tabindex', '0');
+    const pct = (count / max) * 100;
+    row.innerHTML = `<div class="module-name">${escapeHtml(mod)}</div><div class="module-bar"><div class="module-fill" style="width:${pct}%"></div></div><div class="module-count">${count}</div>`;
+    row.addEventListener('click', () => applyModuloFilter(mod));
+    row.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); applyModuloFilter(mod); } });
+    container.appendChild(row);
+  });
+};
+
+['f-busca', 'f-categoria', 'f-modulo', 'f-colega', 'f-integracao', 'f-origem', 'f-status', 'f-ordem'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderCards);
+  document.getElementById(id).addEventListener('change', renderCards);
+});
+
+document.getElementById('btn-clear').addEventListener('click', () => { clearFiltersOnly(); renderCards(); });
+
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+/* =========================
+   PRIORIZAÇÃO GT
+   ========================= */
+const safeStorage = {
+  get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+  set(key, val) { try { localStorage.setItem(key, val); } catch (e) {} },
+  remove(key) { try { localStorage.removeItem(key); } catch (e) {} }
+};
+
+let priorizacaoState = { votante: '', votos: {}, ordens: {}, atualizadoEm: null };
+let onlyPending = false;
+let dragSourceHeight = 80;
+const PLACEHOLDER_TIER_CLASSES = ['tier-p0', 'tier-p1', 'tier-p2', 'tier-p3', 'tier-backlog', 'tier-nao', 'tier-descartada'];
+
+// Auto-scroll while dragging near viewport edges
+const dragScrollState = { active: false, lastY: 0, rAF: null };
+const AUTOSCROLL_THRESHOLD = 80;
+const AUTOSCROLL_MAX_SPEED = 14;
+const autoScrollTick = () => {
+  if (!dragScrollState.active) { dragScrollState.rAF = null; return; }
+  const y = dragScrollState.lastY;
+  const top = y;
+  const bottom = window.innerHeight - y;
+  let speed = 0;
+  if (top < AUTOSCROLL_THRESHOLD && top >= 0) {
+    speed = -AUTOSCROLL_MAX_SPEED * (1 - top / AUTOSCROLL_THRESHOLD);
+  } else if (bottom < AUTOSCROLL_THRESHOLD && bottom >= 0) {
+    speed = AUTOSCROLL_MAX_SPEED * (1 - bottom / AUTOSCROLL_THRESHOLD);
+  }
+  if (speed !== 0) window.scrollBy(0, speed);
+  dragScrollState.rAF = requestAnimationFrame(autoScrollTick);
+};
+document.addEventListener('dragover', (e) => {
+  if (dragScrollState.active) dragScrollState.lastY = e.clientY;
+}, true);
+
+const tiers = [
+  { id: 'P0', label: 'Crítica', cls: 'p0', limit: TIER_LIMIT },
+  { id: 'P1', label: 'Alta', cls: 'p1', limit: TIER_LIMIT },
+  { id: 'P2', label: 'Média', cls: 'p2', limit: TIER_LIMIT },
+  { id: 'P3', label: 'Baixa', cls: 'p3', limit: TIER_LIMIT },
+  { id: 'BACKLOG', label: 'Backlog', cls: 'backlog', limit: null },
+  { id: 'NAO', label: 'Não classificadas', cls: 'nao', limit: null },
+  { id: 'DESC', label: 'Descartadas', cls: 'descartada', limit: null }
+];
+
+const tierToPrio = (tierId) => {
+  if (tierId === 'BACKLOG') return 'backlog';
+  if (tierId === 'NAO') return null;
+  if (tierId === 'DESC') return 'descartada';
+  return tierId;
+};
+
+const tierIdFromPrio = (p) => {
+  if (p === 'P0' || p === 'P1' || p === 'P2' || p === 'P3') return p;
+  if (p === 'backlog') return 'BACKLOG';
+  if (p === 'descartada') return 'DESC';
+  return 'NAO';
+};
+
+const tierClsOf = (tierId) => (tiers.find(t => t.id === tierId) || {}).cls || '';
+
+const removeAllPlaceholders = () => {
+  document.querySelectorAll('.drop-placeholder').forEach(el => el.remove());
+};
+
+const melhoriasPriorizaveis = () => dados.solicitacoes.filter(s => s.categoria === 'Melhoria' && !s.resolvido);
+
+const loadVotes = () => {
+  const raw = safeStorage.get(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      priorizacaoState = {
+        votante: parsed.votante || '',
+        votos: parsed.votos || {},
+        ordens: parsed.ordens || {},
+        atualizadoEm: parsed.atualizadoEm || null
+      };
+    }
+  } catch (e) {}
+};
+
+const saveVotes = () => {
+  priorizacaoState.atualizadoEm = new Date().toISOString();
+  safeStorage.set(STORAGE_KEY, JSON.stringify(priorizacaoState));
+};
+
+const ensureVote = (id) => {
+  if (!priorizacaoState.votos[id]) priorizacaoState.votos[id] = { prioridade: null };
+  return priorizacaoState.votos[id];
+};
+
+const getPrioridade = (id) => priorizacaoState.votos[id]?.prioridade || null;
+
+const tierCount = (prio) => Object.values(priorizacaoState.votos).filter(v => v.prioridade === prio).length;
+
+const overLimitTiers = () => LIMITED_TIERS.filter(t => tierCount(t) > TIER_LIMIT);
+const hasOverLimit = () => overLimitTiers().length > 0;
+
+const formatOverLabel = () => overLimitTiers().map(t => `${tierLabelOf(t)} (${tierCount(t)}/${TIER_LIMIT})`).join(', ');
+
+const removeFromAllOrdens = (id) => {
+  Object.keys(priorizacaoState.ordens).forEach(t => {
+    const arr = (priorizacaoState.ordens[t] || []).filter(x => x !== id);
+    if (arr.length === 0) delete priorizacaoState.ordens[t];
+    else priorizacaoState.ordens[t] = arr;
+  });
+};
+
+const computeOrderedItems = (tierId, items) => {
+  const savedOrder = priorizacaoState.ordens[tierId] || [];
+  const itemMap = new Map(items.map(s => [s.id, s]));
+  const result = [];
+  const used = new Set();
+  savedOrder.forEach(id => {
+    if (itemMap.has(id)) { result.push(itemMap.get(id)); used.add(id); }
+  });
+  const remaining = items.filter(s => !used.has(s.id));
+  remaining.sort((a, b) => uniqueCount(b) - uniqueCount(a));
+  return result.concat(remaining);
+};
+
+const setPrioridade = (id, prio) => {
+  const vote = ensureVote(id);
+  vote.prioridade = prio;
+  if (!vote.prioridade) delete priorizacaoState.votos[id];
+  removeFromAllOrdens(id);
+  saveVotes();
+  renderPriorizacao();
+};
+
+const dropAtPosition = (cardId, targetTier, insertIndex) => {
+  const newPrio = tierToPrio(targetTier);
+  const vote = ensureVote(cardId);
+  vote.prioridade = newPrio;
+  if (!vote.prioridade) delete priorizacaoState.votos[cardId];
+  removeFromAllOrdens(cardId);
+  const all = melhoriasPriorizaveis();
+  const tierItems = all.filter(s => tierOf(s) === targetTier && s.id !== cardId);
+  const ordered = computeOrderedItems(targetTier, tierItems);
+  const newOrder = ordered.map(s => s.id);
+  const idx = Math.max(0, Math.min(insertIndex, newOrder.length));
+  newOrder.splice(idx, 0, cardId);
+  priorizacaoState.ordens[targetTier] = newOrder;
+  saveVotes();
+  renderPriorizacao();
+};
+
+const tierOf = (s) => tierIdFromPrio(getPrioridade(s.id));
+
+const updatePrintHeader = () => {
+  const meta = document.getElementById('print-meta');
+  if (!meta) return;
+  const now = new Date();
+  const dataStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+  meta.innerHTML = `<strong>Votante:</strong> ${escapeHtml(priorizacaoState.votante || '(não identificado)')} &nbsp;-&nbsp; <strong>Data:</strong> ${dataStr} &nbsp;-&nbsp; <strong>Versão do artefato:</strong> ${ARTEFATO_VERSAO}`;
+};
+
+const renderPriorizacaoStats = () => {
+  const all = melhoriasPriorizaveis();
+  const counts = { P0: 0, P1: 0, P2: 0, P3: 0, BACKLOG: 0, NAO: 0, DESC: 0 };
+  all.forEach(s => counts[tierOf(s)]++);
+  const classified = counts.P0 + counts.P1 + counts.P2 + counts.P3 + counts.BACKLOG + counts.DESC;
+  const pct = all.length ? Math.round((classified / all.length) * 100) : 0;
+  const fmtLimited = (key) => {
+    const c = counts[key];
+    const over = c > TIER_LIMIT;
+    return `<strong>${c}</strong>/${TIER_LIMIT}${over ? ' <span class="over-mark">⚠</span>' : ''}`;
+  };
+  const stats = document.getElementById('priorizacao-stats');
+  stats.innerHTML = `
+    <span><strong>${classified}</strong> de <strong>${all.length}</strong> classificadas (${pct}%)</span>
+    <span style="color:#dc2626">Crítica: ${fmtLimited('P0')}</span>
+    <span style="color:#ea580c">Alta: ${fmtLimited('P1')}</span>
+    <span style="color:#ca8a04">Média: ${fmtLimited('P2')}</span>
+    <span style="color:#3b82f6">Baixa: ${fmtLimited('P3')}</span>
+    <span style="color:#0891b2">Backlog: <strong>${counts.BACKLOG}</strong></span>
+    <span style="color:#6b7280">Não: <strong>${counts.NAO}</strong></span>
+    <span style="color:#374151">Descartadas: <strong>${counts.DESC}</strong></span>
+  `;
+};
+
+const buildPrioCard = (s, position, tierId) => {
+  const prio = getPrioridade(s.id);
+  const isDescartada = prio === 'descartada';
+  const uniq = uniqueCount(s);
+  const card = document.createElement('div');
+  card.className = 'prio-card' + (isDescartada ? ' descartada-card' : '');
+  card.setAttribute('draggable', 'true');
+  card.setAttribute('data-card-id', s.id);
+
+  const tierCls = tierClsOf(tierId);
+  const showPosition = BADGE_TIERS.indexOf(tierId) >= 0 && position;
+  const positionBadge = showPosition
+    ? `<span class="prio-position ${tierCls}" title="Posição #${position} em ${tierLabelOf(tierId)}">#${position}</span>`
+    : '';
+
+  card.innerHTML = `
+    <div class="prio-header">
+      <div class="prio-title-wrap">
+        ${positionBadge}
+        <div class="prio-title">${escapeHtml(s.titulo)}</div>
+      </div>
+      <div class="prio-badges">
+        <span class="badge modulo">${escapeHtml(s.modulo)}</span>
+        ${s.integracao ? '<span class="badge integracao">Integração</span>' : ''}
+        ${fromGT(s) ? '<span class="badge gt">GT</span>' : ''}
+        <span class="badge count">${uniq} solicitante${uniq > 1 ? 's' : ''}</span>
+      </div>
+    </div>
+    <div class="prio-desc">${escapeHtml(s.descricao)}</div>
+    <div class="prio-buttons">
+      <button class="prio-btn p0 ${prio === 'P0' ? 'active' : ''}" data-prio="P0">Crítica</button>
+      <button class="prio-btn p1 ${prio === 'P1' ? 'active' : ''}" data-prio="P1">Alta</button>
+      <button class="prio-btn p2 ${prio === 'P2' ? 'active' : ''}" data-prio="P2">Média</button>
+      <button class="prio-btn p3 ${prio === 'P3' ? 'active' : ''}" data-prio="P3">Baixa</button>
+      <button class="prio-btn backlog ${prio === 'backlog' ? 'active' : ''}" data-prio="backlog">Backlog</button>
+      <button class="prio-btn descartar ${isDescartada ? 'active' : ''}" data-prio="descartada">Descartar</button>
+    </div>
+  `;
+
+  card.querySelectorAll('.prio-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.getAttribute('data-prio');
+      const current = getPrioridade(s.id);
+      setPrioridade(s.id, current === p ? null : p);
+    });
+  });
+
+  card.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('text/plain', String(s.id));
+    e.dataTransfer.effectAllowed = 'move';
+    dragSourceHeight = card.offsetHeight || 80;
+    setTimeout(() => card.classList.add('dragging'), 0);
+    // Activate auto-scroll
+    dragScrollState.active = true;
+    dragScrollState.lastY = e.clientY;
+    if (!dragScrollState.rAF) dragScrollState.rAF = requestAnimationFrame(autoScrollTick);
+  });
+  card.addEventListener('dragend', () => {
+    card.classList.remove('dragging');
+    removeAllPlaceholders();
+    document.querySelectorAll('.tier-empty').forEach(el => { el.style.display = ''; });
+    dragScrollState.active = false;
+  });
+
+  return card;
+};
+
+const updateActionButtonsState = () => {
+  const overTiers = overLimitTiers();
+  const hasOver = overTiers.length > 0;
+  const exportBtn = document.getElementById('btn-export-json');
+  const printBtn = document.getElementById('btn-print-pdf');
+
+  const validVotante = !!priorizacaoState.votante.trim();
+  const overListLabel = formatOverLabel();
+
+  if (exportBtn) {
+    exportBtn.disabled = !validVotante || hasOver;
+    if (!validVotante) {
+      exportBtn.title = 'Identifique-se no campo "Seu nome" para habilitar o export';
+    } else if (hasOver) {
+      exportBtn.title = `Reduza para ${TIER_LIMIT} itens nas classificações ${overListLabel} antes de exportar`;
+    } else {
+      exportBtn.title = 'Baixar arquivo JSON com seus votos';
+    }
+  }
+  if (printBtn) {
+    printBtn.disabled = hasOver;
+    printBtn.title = hasOver ? `Reduza para ${TIER_LIMIT} itens nas classificações ${overListLabel} antes de imprimir` : 'Imprimir / Salvar como PDF';
+  }
+
+  const warnRow = document.getElementById('priorizacao-warning-row');
+  const warnEl = document.getElementById('priorizacao-warning');
+  if (hasOver) {
+    warnRow.classList.remove('hidden');
+    warnEl.innerHTML = `⚠ <strong>Excesso de itens</strong> em ${overListLabel} — exportação JSON e impressão PDF bloqueadas até reduzir para ${TIER_LIMIT} itens em cada uma dessas classificações.`;
+  } else {
+    warnRow.classList.add('hidden');
+    warnEl.innerHTML = '';
+  }
+};
+
+const SNAP_BUFFER = 12;
+
+const setupTierDropTargets = () => {
+  document.querySelectorAll('.tier-section[data-drop-tier]').forEach(section => {
+    const body = section.querySelector('.tier-body');
+    const tierId = section.getAttribute('data-drop-tier');
+    const tierCls = tierClsOf(tierId);
+
+    section.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+
+      const cards = Array.from(body.querySelectorAll('.prio-card:not(.dragging)'));
+      let placeholder = body.querySelector('.drop-placeholder');
+
+      // Magnetic snap: while cursor is inside the existing placeholder zone (with buffer),
+      // keep current position — avoids flickering between adjacent slots.
+      let insertIndex;
+      if (placeholder) {
+        const phRect = placeholder.getBoundingClientRect();
+        if (e.clientY >= phRect.top - SNAP_BUFFER && e.clientY <= phRect.bottom + SNAP_BUFFER) {
+          insertIndex = parseInt(section.dataset.insertIndex || '0', 10);
+        }
+      }
+
+      if (insertIndex === undefined) {
+        insertIndex = cards.length;
+        for (let i = 0; i < cards.length; i++) {
+          const r = cards[i].getBoundingClientRect();
+          if (e.clientY < r.top + r.height / 2) { insertIndex = i; break; }
+        }
+      }
+
+      // Remove placeholders from other sections
+      document.querySelectorAll('.drop-placeholder').forEach(el => {
+        if (el.parentElement !== body) el.remove();
+      });
+
+      const targetHeight = (dragSourceHeight || 80) + 8;
+      const isNew = !placeholder;
+      if (isNew) {
+        placeholder = document.createElement('div');
+        placeholder.className = 'drop-placeholder';
+        placeholder.style.height = '0px';
+      }
+
+      // Reset tier color classes; reapply if empty tier
+      PLACEHOLDER_TIER_CLASSES.forEach(c => placeholder.classList.remove(c));
+      if (cards.length === 0 && tierCls) {
+        placeholder.classList.add('tier-' + tierCls);
+      }
+
+      // Position the placeholder
+      if (insertIndex >= cards.length) {
+        if (placeholder.parentElement !== body || body.lastElementChild !== placeholder) body.appendChild(placeholder);
+      } else {
+        if (cards[insertIndex].previousElementSibling !== placeholder) body.insertBefore(placeholder, cards[insertIndex]);
+      }
+
+      // Animate height (smoothly opening) — kick off after insertion
+      if (isNew) {
+        requestAnimationFrame(() => { placeholder.style.height = targetHeight + 'px'; });
+      } else {
+        placeholder.style.height = targetHeight + 'px';
+      }
+
+      // Hide the empty-state message during drag
+      const emptyMsg = body.querySelector('.tier-empty');
+      if (emptyMsg) emptyMsg.style.display = 'none';
+
+      section.dataset.insertIndex = String(insertIndex);
+    });
+
+    section.addEventListener('dragleave', (e) => {
+      if (!section.contains(e.relatedTarget)) {
+        const ph = body.querySelector('.drop-placeholder');
+        if (ph) ph.remove();
+        delete section.dataset.insertIndex;
+        const emptyMsg = body.querySelector('.tier-empty');
+        if (emptyMsg) emptyMsg.style.display = '';
+      }
+    });
+
+    section.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const ph = body.querySelector('.drop-placeholder');
+      if (ph) ph.remove();
+      const idStr = e.dataTransfer.getData('text/plain');
+      const id = parseInt(idStr);
+      if (!id) return;
+      const targetTier = section.getAttribute('data-drop-tier');
+      const insertIndex = parseInt(section.dataset.insertIndex || '0', 10);
+      delete section.dataset.insertIndex;
+      dragScrollState.active = false;
+      dropAtPosition(id, targetTier, insertIndex);
+    });
+  });
+};
+
+const renderPriorizacao = () => {
+  const nomeInput = document.getElementById('votante-nome');
+  if (nomeInput && nomeInput.value !== priorizacaoState.votante) nomeInput.value = priorizacaoState.votante;
+
+  renderPriorizacaoStats();
+  updatePrintHeader();
+  updateActionButtonsState();
+
+  const container = document.getElementById('priorizacao-container');
+  container.innerHTML = '';
+
+  const all = melhoriasPriorizaveis();
+
+  tiers.forEach(t => {
+    if (onlyPending && t.id !== 'NAO') return;
+    let items = all.filter(s => tierOf(s) === t.id);
+    items = computeOrderedItems(t.id, items);
+
+    const isLimited = t.limit !== null;
+    const isOver = isLimited && items.length > t.limit;
+    const isFull = isLimited && items.length === t.limit;
+    const countLabel = isLimited ? `${items.length} / ${t.limit}${isOver ? ' ⚠' : ''}` : `${items.length}`;
+    const countClass = isOver ? ' over-limit' : (isFull ? ' full' : '');
+
+    const section = document.createElement('div');
+    section.className = 'tier-section';
+    section.setAttribute('data-drop-tier', t.id);
+    section.innerHTML = `
+      <div class="tier-header ${t.cls}">
+        <div>${escapeHtml(t.label)}</div>
+        <div class="tier-count${countClass}">${countLabel}</div>
+      </div>
+      <div class="tier-body"></div>
+    `;
+    container.appendChild(section);
+    const body = section.querySelector('.tier-body');
+    if (items.length === 0) {
+      body.innerHTML = '<div class="tier-empty">Nenhum item neste nível. (Solte um card aqui para classificá-lo.)</div>';
+    } else {
+      items.forEach((s, idx) => body.appendChild(buildPrioCard(s, idx + 1, t.id)));
+    }
+  });
+
+  setupTierDropTargets();
+};
+
+const sanitizeFilename = (s) => {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 60) || 'votante';
+};
+
+const positionOf = (s) => {
+  const tierId = tierOf(s);
+  if (POSITIONED_TIERS.indexOf(tierId) < 0) return null;
+  const all = melhoriasPriorizaveis();
+  const tierItems = all.filter(x => tierOf(x) === tierId);
+  const ordered = computeOrderedItems(tierId, tierItems);
+  const idx = ordered.findIndex(x => x.id === s.id);
+  return idx >= 0 ? idx + 1 : null;
+};
+
+const exportarVotosJSON = () => {
+  if (!priorizacaoState.votante.trim()) {
+    alert('Identifique-se no campo "Seu nome" antes de exportar.');
+    return;
+  }
+  if (hasOverLimit()) {
+    alert(`Reduza para ${TIER_LIMIT} itens nas classificações ${formatOverLabel()} antes de exportar.`);
+    return;
+  }
+  const all = melhoriasPriorizaveis();
+  const votos = all.map(s => ({
+    id: s.id,
+    titulo: s.titulo,
+    prioridade: getPrioridade(s.id),
+    posicao: positionOf(s)
+  }));
+  const payload = {
+    tipo: 'votos-priorizacao-saj-defensorias-gt',
+    versaoArtefato: ARTEFATO_VERSAO,
+    votante: priorizacaoState.votante.trim(),
+    dataExportacao: new Date().toISOString(),
+    totalMelhorias: all.length,
+    totalClassificadas: votos.filter(v => v.prioridade).length,
+    votos: votos
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeName = sanitizeFilename(priorizacaoState.votante.trim());
+  const dateStr = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `votos_priorizacao_saj_${safeName}_${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+const importarVotosJSON = (file) => {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || data.tipo !== 'votos-priorizacao-saj-defensorias-gt') {
+        alert('Arquivo inválido: não é um JSON de votos do GT SAJ Defensorias.');
+        return;
+      }
+      const novosVotos = {};
+      const ordensTemp = {};
+      const dropped = [];
+      const findByVote = (v) => {
+        let alvo = dados.solicitacoes.find(s => s.id === v.id && s.titulo === v.titulo);
+        if (!alvo) alvo = dados.solicitacoes.find(s => s.titulo === v.titulo);
+        return alvo;
+      };
+      (data.votos || []).forEach(v => {
+        if (!v.prioridade) return;
+        const alvo = findByVote(v);
+        if (!alvo) { dropped.push(v.titulo); return; }
+        novosVotos[alvo.id] = { prioridade: v.prioridade };
+        if (typeof v.posicao === 'number' && v.posicao > 0) {
+          const tierId = tierIdFromPrio(v.prioridade);
+          if (POSITIONED_TIERS.indexOf(tierId) >= 0) {
+            if (!ordensTemp[tierId]) ordensTemp[tierId] = [];
+            ordensTemp[tierId].push({ id: alvo.id, posicao: v.posicao });
+          }
+        }
+      });
+      const novasOrdens = {};
+      Object.keys(ordensTemp).forEach(t => {
+        novasOrdens[t] = ordensTemp[t].sort((a, b) => a.posicao - b.posicao).map(x => x.id);
+      });
+      let msg = `Importar votos de "${data.votante || 'desconhecido'}" (${Object.keys(novosVotos).length} item(ns))? Os votos atuais serão substituídos.`;
+      if (dropped.length) {
+        msg += `\n\n${dropped.length} voto(s) não puderam ser correspondidos a melhorias atuais e serão descartados:\n- ${dropped.slice(0, 5).join('\n- ')}${dropped.length > 5 ? `\n+ ${dropped.length - 5} outros` : ''}`;
+      }
+      if (!confirm(msg)) return;
+      priorizacaoState.votante = data.votante || '';
+      priorizacaoState.votos = novosVotos;
+      priorizacaoState.ordens = novasOrdens;
+      saveVotes();
+      renderPriorizacao();
+    } catch (err) {
+      alert('Erro ao ler o arquivo: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+};
+
+const limparVotos = () => {
+  if (!confirm('Limpar todos os seus votos? Esta ação não pode ser desfeita.')) return;
+  priorizacaoState.votos = {};
+  priorizacaoState.ordens = {};
+  saveVotes();
+  renderPriorizacao();
+};
+
+loadVotes();
+const nomeInput = document.getElementById('votante-nome');
+nomeInput.value = priorizacaoState.votante;
+nomeInput.addEventListener('input', () => {
+  priorizacaoState.votante = nomeInput.value;
+  saveVotes();
+  updateActionButtonsState();
+  updatePrintHeader();
+});
+
+document.getElementById('toggle-only-pending').addEventListener('change', (e) => {
+  onlyPending = e.target.checked;
+  renderPriorizacao();
+});
+
+document.getElementById('btn-export-json').addEventListener('click', exportarVotosJSON);
+
+document.getElementById('btn-print-pdf').addEventListener('click', () => {
+  if (hasOverLimit()) {
+    alert(`Reduza para ${TIER_LIMIT} itens nas classificações ${formatOverLabel()} antes de imprimir.`);
+    return;
+  }
+  const wasOnlyPending = onlyPending;
+  if (wasOnlyPending) {
+    onlyPending = false;
+    document.getElementById('toggle-only-pending').checked = false;
+    renderPriorizacao();
+  }
+  const wasActiveTab = document.querySelector('.tab.active')?.dataset.tab;
+  if (wasActiveTab !== 'priorizacao') switchTab('priorizacao');
+  setTimeout(() => {
+    window.print();
+    if (wasOnlyPending) {
+      onlyPending = true;
+      document.getElementById('toggle-only-pending').checked = true;
+      renderPriorizacao();
+    }
+    if (wasActiveTab && wasActiveTab !== 'priorizacao') switchTab(wasActiveTab);
+  }, 200);
+});
+
+document.getElementById('btn-import-json').addEventListener('click', () => document.getElementById('file-import').click());
+document.getElementById('file-import').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) importarVotosJSON(file);
+  e.target.value = '';
+});
+document.getElementById('btn-clear-votes').addEventListener('click', limparVotos);
+
+renderCards();
+renderRanking();
+renderColegas();
+renderModulos();
+renderPriorizacao();
+</script>
+</body>
+</html>
