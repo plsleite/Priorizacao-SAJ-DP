@@ -1,0 +1,155 @@
+{
+  "tipo": "votos-priorizacao-saj-defensorias-gt",
+  "versaoArtefato": "2026-04-25",
+  "votante": "Marcel Macedo",
+  "dataExportacao": "2026-04-26T05:22:13.386Z",
+  "totalMelhorias": 29,
+  "totalClassificadas": 29,
+  "votos": [
+    {
+      "id": 3,
+      "titulo": "Assinatura e peticionamento em lote",
+      "prioridade": "P1"
+    },
+    {
+      "id": 4,
+      "titulo": "Observações visíveis no card/fluxo",
+      "prioridade": "P1"
+    },
+    {
+      "id": 5,
+      "titulo": "Editor de texto",
+      "prioridade": "P1"
+    },
+    {
+      "id": 6,
+      "titulo": "Autotexto/atalho no editor",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 9,
+      "titulo": "Exibição de tarjas",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 11,
+      "titulo": "Busca de processos por dados de qualificação (nome, CPF etc.)",
+      "prioridade": "P2"
+    },
+    {
+      "id": 12,
+      "titulo": "Gerenciador de arquivos",
+      "prioridade": "P3"
+    },
+    {
+      "id": 13,
+      "titulo": "Ciência automática em bloco",
+      "prioridade": "P0"
+    },
+    {
+      "id": 14,
+      "titulo": "Histórico do objeto no fluxo",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 15,
+      "titulo": "Modo escuro global e individual",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 16,
+      "titulo": "Popup persistente para conflito",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 17,
+      "titulo": "Calculadora de prazo integrada com TJMS",
+      "prioridade": "P0"
+    },
+    {
+      "id": 18,
+      "titulo": "Chat de suporte com Softplan na plataforma",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 19,
+      "titulo": "Integração com IA (Copilot)",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 20,
+      "titulo": "Página web com status das sugestões",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 22,
+      "titulo": "Remessa em lote",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 23,
+      "titulo": "Indicação de páginas no sumário/árvore",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 24,
+      "titulo": "Exibição de todas as intimações etiquetadas (reativação do organizador 'A Fazer')",
+      "prioridade": "P2"
+    },
+    {
+      "id": 25,
+      "titulo": "Filtro por data de vencimento/período",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 26,
+      "titulo": "Pauta de audiências",
+      "prioridade": "P0"
+    },
+    {
+      "id": 27,
+      "titulo": "Calculadora de valores judiciais",
+      "prioridade": "P3"
+    },
+    {
+      "id": 28,
+      "titulo": "Card localizado pela pesquisa deve permitir ações",
+      "prioridade": "P3"
+    },
+    {
+      "id": 31,
+      "titulo": "Organização dos cards (padrão SAJ TJ)",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 32,
+      "titulo": "Leitura em lote (F12 do SAJ TJ)",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 39,
+      "titulo": "Árvore de documentos categorizada (padrão SAJ TJ)",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 41,
+      "titulo": "Modo de visualização condensada do fluxo",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 42,
+      "titulo": "Filtros avançados (competência, classe/assunto, integração, vara de origem)",
+      "prioridade": "P2"
+    },
+    {
+      "id": 48,
+      "titulo": "Reposicionamento de pop-up sobre o botão de assinatura",
+      "prioridade": "backlog"
+    },
+    {
+      "id": 49,
+      "titulo": "Destaque visual da existência de observação no card",
+      "prioridade": "descartada"
+    }
+  ]
+}

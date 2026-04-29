@@ -130,7 +130,42 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .priorizacao-stats span strong { color: #111; font-size: 14px; }
 .priorizacao-stats .over-mark { font-weight: 700; }
 .priorizacao-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.action-tooltip { position: relative; display: inline-flex; }
+.action-tooltip[data-tooltip]:hover::after,
+.action-tooltip[data-tooltip]:focus-within::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(320px, calc(100vw - 32px));
+  background: #111827;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+  z-index: 20;
+  white-space: normal;
+  pointer-events: none;
+}
+.action-tooltip[data-tooltip]:hover::before,
+.action-tooltip[data-tooltip]:focus-within::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #111827;
+  z-index: 21;
+  pointer-events: none;
+}
 .btn-action { padding: 9px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all .15s; }
+.action-tooltip .btn-action:disabled { pointer-events: none; }
 .btn-export { background: #1e3a8a; color: white; border-color: #1e3a8a; }
 .btn-export:hover:not(:disabled) { background: #1e40af; }
 .btn-export:disabled { background: #9ca3af; border-color: #9ca3af; cursor: not-allowed; opacity: .8; }
@@ -346,8 +381,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     </div>
     <div class="priorizacao-row">
       <div class="priorizacao-actions">
-        <button class="btn-action btn-export" id="btn-export-json">⬇ Exportar votos (.json)</button>
-        <button class="btn-action btn-print" id="btn-print-pdf">🖨 Imprimir / Salvar PDF</button>
+        <span class="action-tooltip" id="tooltip-export-json"><button class="btn-action btn-export" id="btn-export-json">⬇ Exportar votos (.json)</button></span>
+        <span class="action-tooltip" id="tooltip-print-pdf"><button class="btn-action btn-print" id="btn-print-pdf">🖨 Imprimir / Salvar PDF</button></span>
         <button class="btn-action btn-import" id="btn-import-json">⬆ Importar votos (.json)</button>
         <button class="btn-action btn-clear-votes" id="btn-clear-votes">Limpar meus votos</button>
         <input type="file" id="file-import" accept=".json,application/json" style="display:none">
@@ -865,6 +900,30 @@ const removeAllPlaceholders = () => {
 
 const melhoriasPriorizaveis = () => dados.solicitacoes.filter(s => s.categoria === 'Melhoria' && !s.resolvido);
 
+const priorizavelIdSet = () => new Set(melhoriasPriorizaveis().map(s => String(s.id)));
+
+const prunePriorizacaoState = () => {
+  const validIds = priorizavelIdSet();
+  let changed = false;
+
+  Object.keys(priorizacaoState.votos || {}).forEach(id => {
+    if (!validIds.has(String(id))) {
+      delete priorizacaoState.votos[id];
+      changed = true;
+    }
+  });
+
+  Object.keys(priorizacaoState.ordens || {}).forEach(tierId => {
+    const original = priorizacaoState.ordens[tierId] || [];
+    const filtered = original.filter(id => validIds.has(String(id)));
+    if (filtered.length !== original.length) changed = true;
+    if (filtered.length === 0) delete priorizacaoState.ordens[tierId];
+    else priorizacaoState.ordens[tierId] = filtered;
+  });
+
+  return changed;
+};
+
 const loadVotes = () => {
   const raw = safeStorage.get(STORAGE_KEY);
   if (!raw) return;
@@ -877,6 +936,7 @@ const loadVotes = () => {
         ordens: parsed.ordens || {},
         atualizadoEm: parsed.atualizadoEm || null
       };
+      if (prunePriorizacaoState()) saveVotes();
     }
   } catch (e) {}
 };
@@ -893,7 +953,12 @@ const ensureVote = (id) => {
 
 const getPrioridade = (id) => priorizacaoState.votos[id]?.prioridade || null;
 
-const tierCount = (prio) => Object.values(priorizacaoState.votos).filter(v => v.prioridade === prio).length;
+const tierCount = (prio) => {
+  const validIds = priorizavelIdSet();
+  return Object.entries(priorizacaoState.votos)
+    .filter(([id, v]) => validIds.has(String(id)) && v.prioridade === prio)
+    .length;
+};
 
 const overLimitTiers = () => LIMITED_TIERS.filter(t => tierCount(t) > TIER_LIMIT);
 const hasOverLimit = () => overLimitTiers().length > 0;
@@ -1053,23 +1118,30 @@ const updateActionButtonsState = () => {
   const hasOver = overTiers.length > 0;
   const exportBtn = document.getElementById('btn-export-json');
   const printBtn = document.getElementById('btn-print-pdf');
+  const exportTooltip = document.getElementById('tooltip-export-json');
+  const printTooltip = document.getElementById('tooltip-print-pdf');
 
   const validVotante = !!priorizacaoState.votante.trim();
   const overListLabel = formatOverLabel();
 
   if (exportBtn) {
+    let tooltip = '';
     exportBtn.disabled = !validVotante || hasOver;
     if (!validVotante) {
-      exportBtn.title = 'Identifique-se no campo "Seu nome" para habilitar o export';
+      tooltip = 'Informe seu nome no campo "Seu nome" para habilitar a exportação dos votos.';
     } else if (hasOver) {
-      exportBtn.title = `Reduza para ${TIER_LIMIT} itens nas classificações ${overListLabel} antes de exportar`;
+      tooltip = `Reduza para ${TIER_LIMIT} itens nas classificações ${overListLabel} antes de exportar.`;
     } else {
-      exportBtn.title = 'Baixar arquivo JSON com seus votos';
+      tooltip = 'Baixar arquivo JSON com seus votos.';
     }
+    exportBtn.title = tooltip;
+    if (exportTooltip) exportTooltip.setAttribute('data-tooltip', tooltip);
   }
   if (printBtn) {
+    const tooltip = hasOver ? `Reduza para ${TIER_LIMIT} itens nas classificações ${overListLabel} antes de imprimir.` : 'Imprimir / Salvar como PDF.';
     printBtn.disabled = hasOver;
-    printBtn.title = hasOver ? `Reduza para ${TIER_LIMIT} itens nas classificações ${overListLabel} antes de imprimir` : 'Imprimir / Salvar como PDF';
+    printBtn.title = tooltip;
+    if (printTooltip) printTooltip.setAttribute('data-tooltip', tooltip);
   }
 
   const warnRow = document.getElementById('priorizacao-warning-row');
@@ -1295,9 +1367,10 @@ const importarVotosJSON = (file) => {
       const novosVotos = {};
       const ordensTemp = {};
       const dropped = [];
+      const priorizaveis = melhoriasPriorizaveis();
       const findByVote = (v) => {
-        let alvo = dados.solicitacoes.find(s => s.id === v.id && s.titulo === v.titulo);
-        if (!alvo) alvo = dados.solicitacoes.find(s => s.titulo === v.titulo);
+        let alvo = priorizaveis.find(s => s.id === v.id && s.titulo === v.titulo);
+        if (!alvo) alvo = priorizaveis.find(s => s.titulo === v.titulo);
         return alvo;
       };
       (data.votos || []).forEach(v => {

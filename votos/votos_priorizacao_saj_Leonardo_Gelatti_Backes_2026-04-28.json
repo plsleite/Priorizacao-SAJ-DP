@@ -1,0 +1,184 @@
+{
+  "tipo": "votos-priorizacao-saj-defensorias-gt",
+  "versaoArtefato": "2026-04-26",
+  "votante": "Leonardo Gelatti Backes",
+  "dataExportacao": "2026-04-28T13:47:29.835Z",
+  "totalMelhorias": 29,
+  "totalClassificadas": 29,
+  "votos": [
+    {
+      "id": 3,
+      "titulo": "Assinatura e peticionamento em lote",
+      "prioridade": "P0",
+      "posicao": 2
+    },
+    {
+      "id": 4,
+      "titulo": "Observações visíveis no card/fluxo",
+      "prioridade": "backlog",
+      "posicao": 1
+    },
+    {
+      "id": 5,
+      "titulo": "Editor de texto",
+      "prioridade": "P0",
+      "posicao": 1
+    },
+    {
+      "id": 6,
+      "titulo": "Autotexto/atalho no editor",
+      "prioridade": "backlog",
+      "posicao": 3
+    },
+    {
+      "id": 9,
+      "titulo": "Exibição de tarjas",
+      "prioridade": "P2",
+      "posicao": 1
+    },
+    {
+      "id": 11,
+      "titulo": "Busca de processos por dados de qualificação (nome, CPF etc.)",
+      "prioridade": "P3",
+      "posicao": 1
+    },
+    {
+      "id": 12,
+      "titulo": "Gerenciador de arquivos",
+      "prioridade": "backlog",
+      "posicao": 4
+    },
+    {
+      "id": 13,
+      "titulo": "Ciência automática em bloco",
+      "prioridade": "backlog",
+      "posicao": 5
+    },
+    {
+      "id": 14,
+      "titulo": "Histórico do objeto no fluxo",
+      "prioridade": "P2",
+      "posicao": 2
+    },
+    {
+      "id": 15,
+      "titulo": "Modo escuro global e individual",
+      "prioridade": "backlog",
+      "posicao": 6
+    },
+    {
+      "id": 16,
+      "titulo": "Popup persistente para conflito",
+      "prioridade": "P2",
+      "posicao": 3
+    },
+    {
+      "id": 17,
+      "titulo": "Calculadora de prazo integrada com TJMS",
+      "prioridade": "P0",
+      "posicao": 3
+    },
+    {
+      "id": 18,
+      "titulo": "Chat de suporte com Softplan na plataforma",
+      "prioridade": "backlog",
+      "posicao": 7
+    },
+    {
+      "id": 19,
+      "titulo": "Integração com IA (Copilot)",
+      "prioridade": "backlog",
+      "posicao": 12
+    },
+    {
+      "id": 20,
+      "titulo": "Página web com status das sugestões",
+      "prioridade": "backlog",
+      "posicao": 13
+    },
+    {
+      "id": 22,
+      "titulo": "Remessa em lote",
+      "prioridade": "backlog",
+      "posicao": 14
+    },
+    {
+      "id": 23,
+      "titulo": "Indicação de páginas no sumário/árvore",
+      "prioridade": "backlog",
+      "posicao": 2
+    },
+    {
+      "id": 24,
+      "titulo": "Exibição de todas as intimações etiquetadas (reativação do organizador 'A Fazer')",
+      "prioridade": "backlog",
+      "posicao": 8
+    },
+    {
+      "id": 25,
+      "titulo": "Filtro por data de vencimento/período",
+      "prioridade": "P1",
+      "posicao": 1
+    },
+    {
+      "id": 26,
+      "titulo": "Pauta de audiências",
+      "prioridade": "backlog",
+      "posicao": 9
+    },
+    {
+      "id": 27,
+      "titulo": "Calculadora de valores judiciais",
+      "prioridade": "backlog",
+      "posicao": 10
+    },
+    {
+      "id": 28,
+      "titulo": "Card localizado pela pesquisa deve permitir ações",
+      "prioridade": "P1",
+      "posicao": 2
+    },
+    {
+      "id": 31,
+      "titulo": "Organização dos cards (padrão SAJ TJ)",
+      "prioridade": "P1",
+      "posicao": 3
+    },
+    {
+      "id": 32,
+      "titulo": "Leitura em lote (F12 do SAJ TJ)",
+      "prioridade": "P3",
+      "posicao": 2
+    },
+    {
+      "id": 39,
+      "titulo": "Árvore de documentos categorizada (padrão SAJ TJ)",
+      "prioridade": "backlog",
+      "posicao": 15
+    },
+    {
+      "id": 41,
+      "titulo": "Modo de visualização condensada do fluxo",
+      "prioridade": "backlog",
+      "posicao": 16
+    },
+    {
+      "id": 42,
+      "titulo": "Filtros avançados (competência, classe/assunto, integração, vara de origem)",
+      "prioridade": "P3",
+      "posicao": 3
+    },
+    {
+      "id": 48,
+      "titulo": "Reposicionamento de pop-up sobre o botão de assinatura",
+      "prioridade": "backlog",
+      "posicao": 11
+    },
+    {
+      "id": 49,
+      "titulo": "Destaque visual da existência de observação no card",
+      "prioridade": "backlog",
+      "posicao": 17
+    }
+  ]
+}
