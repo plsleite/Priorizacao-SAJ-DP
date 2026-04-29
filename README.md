@@ -8,9 +8,10 @@ A DPE/MS migrou do **SAJ Tribunais** (usado pelo Poder Judiciário) para o **SAJ
 
 ## O que faz
 
-A aplicação roda inteiramente no navegador (single-file HTML, sem backend) e oferece cinco modos de visualização:
+A aplicação roda inteiramente no navegador (single-file HTML, sem backend) e oferece seis modos de visualização:
 
-- **Priorização GT** (aba padrão): cada membro do Grupo de Trabalho classifica as melhorias pendentes em Crítica / Alta / Média / Baixa (limite de 3 itens em cada) ou Backlog, com ordem manual via drag-and-drop. Exporta um JSON com os votos.
+- **Consolidação GT** (aba padrão): painel executivo com os votos consolidados do Grupo de Trabalho, Top 12 proposto, ranking completo, consensos, divergências e matriz de votos por defensor.
+- **Priorização GT**: cada membro do Grupo de Trabalho classifica as melhorias pendentes em Crítica / Alta / Média / Baixa (exatamente 3 itens em cada para exportar) ou Backlog, com ordem manual via drag-and-drop. Exporta um JSON com os votos.
 - **Lista detalhada**: filtros por categoria, módulo, solicitante, integração, origem, status e ordenação.
 - **Mais solicitadas**: ranking das demandas por número de solicitantes únicos.
 - **Por colega**: distribuição de solicitações por colaborador.
@@ -35,7 +36,7 @@ A contagem de "solicitantes" considera pessoas únicas (mesmo que tenham reporta
 
 1. Acesse o link da aplicação.
 2. Na aba **Priorização GT**, classifique cada melhoria pendente:
-   - **Crítica, Alta, Média, Baixa**: máximo 3 itens em cada (força priorização consciente).
+   - **Crítica, Alta, Média, Baixa**: exatamente 3 itens em cada para permitir a exportação (força priorização consciente).
    - **Backlog**: itens pertinentes mas que não cabem no top 12 e não serão priorizados no momento.
    - **Descartar**: itens que não devem ser priorizados.
 3. Use os botões dos cards ou arraste e solte entre classificações. Também é possível reordenar dentro de uma classificação por drag-and-drop — a posição (#1, #2, ...) é registrada.
@@ -96,7 +97,17 @@ Valores possíveis de `prioridade`: `"P0"` (Crítica), `"P1"` (Alta), `"P2"` (M�
 
 `posicao`: ordem dentro da classificação (1 = primeira). É `null` em "não classificadas" e "descartadas".
 
-Para inspecionar um voto individual, basta usar o botão **Importar votos (.json)** na própria aplicação — ele carrega o arquivo no navegador e mostra como aquele defensor votou. Para análise consolidada com múltiplos votantes, um script Python ou planilha que percorra os JSONs resolve (somar votos por id, ponderar por prioridade etc.).
+Para inspecionar um voto individual, basta usar o botão **Importar votos (.json)** na própria aplicação — ele carrega o arquivo no navegador e mostra como aquele defensor votou.
+
+Para a análise consolidada com múltiplos votantes, os votos recebidos podem ser embutidos no próprio `index.html`, na constante JavaScript usada pela aba **Consolidação GT**. A pontuação considera prioridade e posição:
+
+- P0: 12, 11 e 10 pontos conforme a posição.
+- P1: 9, 8 e 7 pontos conforme a posição.
+- P2: 6, 5 e 4 pontos conforme a posição.
+- P3: 3, 2 e 1 ponto conforme a posição.
+- Backlog, descartada e não classificada: 0 ponto.
+
+Votos antigos sem `posicao` recebem a pontuação média da faixa (P0 = 11, P1 = 8, P2 = 5, P3 = 2) e aparecem nas observações da consolidação.
 
 #### Hospedagem
 
@@ -126,6 +137,7 @@ Como não há build step, qualquer commit no `index.html` atualiza imediatamente
 ## Limitações conhecidas
 
 - A votação é descentralizada: cada defensor vota localmente e exporta um JSON. Não há agregação automática (consciente, para evitar dependência de backend). A consolidação fica com o gestor.
+- A aba **Consolidação GT** usa votos embutidos manualmente no HTML. Ao receber novos JSONs, é preciso atualizar a constante correspondente no `index.html`.
 - Os votos exportados em uma versão mais antiga do artefato podem ter títulos diferentes dos itens atuais; a importação tenta correlacionar por `id` + `titulo`, com fallback só por `titulo`. Itens não correspondidos são descartados com aviso.
 - O `localStorage` é específico por navegador/dispositivo. Se o defensor abrir em outro computador, começa do zero (mas pode importar o próprio JSON).
 

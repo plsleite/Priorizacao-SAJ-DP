@@ -118,6 +118,81 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .email-body { padding: 14px 16px; font-size: 13px; color: #374151; line-height: 1.6; white-space: pre-wrap; background: white; }
 .email-attachment { display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-top: 6px; }
 
+/* Consolidação GT */
+.consolidacao-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
+.consolidacao-intro { background: white; border-left: 4px solid #1e3a8a; padding: 14px 18px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; color: #374151; line-height: 1.6; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.consolidacao-intro strong { color: #111827; }
+.gt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.gt-stat { background: white; padding: 14px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.05); border-top: 3px solid #1e3a8a; }
+.gt-stat .label { font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: #6b7280; font-weight: 700; }
+.gt-stat .value { font-size: 26px; font-weight: 800; color: #111827; margin-top: 3px; }
+.gt-section { margin-bottom: 18px; }
+.gt-section-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.gt-section-title h2 { font-size: 16px; color: #111827; }
+.gt-section-title p { font-size: 12px; color: #6b7280; }
+.gt-top-grid { display: grid; grid-template-columns: repeat(4, minmax(190px, 1fr)); gap: 12px; }
+.gt-tier-column { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.05); overflow: hidden; }
+.gt-tier-title { padding: 10px 12px; color: white; font-weight: 800; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+.gt-tier-title.p0 { background: linear-gradient(135deg, #991b1b, #dc2626); }
+.gt-tier-title.p1 { background: linear-gradient(135deg, #c2410c, #ea580c); }
+.gt-tier-title.p2 { background: linear-gradient(135deg, #a16207, #ca8a04); }
+.gt-tier-title.p3 { background: linear-gradient(135deg, #1e40af, #3b82f6); }
+.gt-top-card { padding: 12px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background .12s; }
+.gt-top-card:hover { background: #f9fafb; }
+.gt-top-card:last-child { border-bottom: 0; }
+.gt-rank-line { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; margin-bottom: 6px; }
+.gt-rank { min-width: 30px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: #f3f4f6; color: #374151; font-weight: 800; font-size: 12px; }
+.gt-score { font-size: 12px; font-weight: 800; color: #1e3a8a; white-space: nowrap; }
+.gt-title { font-weight: 800; font-size: 13px; color: #111827; line-height: 1.35; margin-bottom: 6px; }
+.gt-meta { color: #6b7280; font-size: 11px; margin-bottom: 8px; }
+.gt-dist { display: flex; height: 9px; border-radius: 999px; overflow: hidden; background: #e5e7eb; margin-bottom: 7px; }
+.gt-dist-seg.p0 { background: #dc2626; }
+.gt-dist-seg.p1 { background: #ea580c; }
+.gt-dist-seg.p2 { background: #ca8a04; }
+.gt-dist-seg.p3 { background: #3b82f6; }
+.gt-dist-seg.backlog { background: #0891b2; }
+.gt-dist-seg.descartada { background: #374151; }
+.gt-dist-seg.nao { background: #d1d5db; }
+.gt-counts { display: flex; gap: 4px; flex-wrap: wrap; }
+.gt-chip { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 999px; background: #f3f4f6; color: #374151; }
+.gt-chip.p0 { background: #fee2e2; color: #991b1b; }
+.gt-chip.p1 { background: #ffedd5; color: #9a3412; }
+.gt-chip.p2 { background: #fef3c7; color: #92400e; }
+.gt-chip.p3 { background: #dbeafe; color: #1e40af; }
+.gt-chip.backlog { background: #cffafe; color: #155e75; }
+.gt-chip.descartada { background: #e5e7eb; color: #1f2937; }
+.gt-chip.nao { background: #f3f4f6; color: #6b7280; }
+.gt-ranking-list { display: grid; gap: 8px; }
+.gt-ranking-row { background: white; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.05); display: grid; grid-template-columns: 44px minmax(220px, 1fr) 110px minmax(180px, 320px); gap: 12px; align-items: center; cursor: pointer; }
+.gt-ranking-row:hover { background: #f9fafb; }
+.gt-ranking-main .gt-title { margin-bottom: 3px; }
+.gt-score-box { text-align: right; font-size: 12px; color: #6b7280; }
+.gt-score-box strong { display: block; color: #111827; font-size: 18px; line-height: 1.1; }
+.gt-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.gt-note-list { background: white; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.gt-note-list h3 { font-size: 13px; margin-bottom: 8px; color: #111827; }
+.gt-note-item { padding: 8px 0; border-top: 1px solid #f3f4f6; font-size: 12px; color: #4b5563; cursor: pointer; }
+.gt-note-item:first-of-type { border-top: 0; }
+.gt-note-item strong { color: #111827; }
+.gt-alerts { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 8px; font-size: 12px; color: #78350f; }
+.gt-alerts ul { margin-left: 18px; }
+.gt-alerts li { margin: 4px 0; }
+.gt-matrix-wrap { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.05); overflow-x: auto; }
+.gt-matrix { width: 100%; border-collapse: collapse; min-width: 920px; font-size: 12px; }
+.gt-matrix th, .gt-matrix td { border-bottom: 1px solid #f3f4f6; padding: 8px 10px; text-align: center; }
+.gt-matrix th:first-child, .gt-matrix td:first-child { text-align: left; position: sticky; left: 0; background: white; z-index: 1; }
+.gt-matrix th { color: #374151; font-size: 11px; text-transform: uppercase; letter-spacing: .25px; background: #f9fafb; }
+.gt-matrix th:first-child { background: #f9fafb; z-index: 2; }
+.gt-matrix-title { max-width: 330px; font-weight: 700; color: #111827; cursor: pointer; }
+.gt-vote-cell { display: inline-flex; min-width: 44px; justify-content: center; align-items: center; border-radius: 999px; padding: 3px 7px; font-size: 11px; font-weight: 800; }
+.gt-vote-cell.p0 { background: #fee2e2; color: #991b1b; }
+.gt-vote-cell.p1 { background: #ffedd5; color: #9a3412; }
+.gt-vote-cell.p2 { background: #fef3c7; color: #92400e; }
+.gt-vote-cell.p3 { background: #dbeafe; color: #1e40af; }
+.gt-vote-cell.backlog { background: #cffafe; color: #155e75; }
+.gt-vote-cell.descartada { background: #e5e7eb; color: #1f2937; }
+.gt-vote-cell.nao { background: #f3f4f6; color: #9ca3af; }
+
 /* Priorização GT */
 .priorizacao-intro { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; color: #78350f; line-height: 1.6; }
 .priorizacao-intro strong { color: #422006; }
@@ -239,8 +314,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
   .header h1 { font-size: 16px; }
   .header p { font-size: 11px; color: #4b5563; }
   .tabs, .modal-overlay { display: none !important; }
-  #tab-lista, #tab-ranking, #tab-colegas, #tab-modulos { display: none !important; }
-  #tab-priorizacao, #tab-priorizacao.hidden { display: block !important; }
+  #tab-lista, #tab-ranking, #tab-colegas, #tab-modulos, #tab-priorizacao, #tab-consolidacao { display: none !important; }
+  body.print-priorizacao #tab-priorizacao, body.print-priorizacao #tab-priorizacao.hidden { display: block !important; }
+  body.print-consolidacao #tab-consolidacao, body.print-consolidacao #tab-consolidacao.hidden, body:not(.print-priorizacao) #tab-consolidacao, body:not(.print-priorizacao) #tab-consolidacao.hidden { display: block !important; }
   .priorizacao-intro, .priorizacao-controls { display: none !important; }
   .priorizacao-print-header { display: block !important; padding: 12px 14px; border: 2px solid #1e3a8a; border-radius: 8px; margin-bottom: 12px; }
   .priorizacao-print-header h2 { font-size: 14px; margin-bottom: 4px; color: #1e3a8a; }
@@ -255,6 +331,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
   .prio-desc { font-size: 10px; margin: 3px 0 4px; }
   .prio-position { min-width: 22px; height: 18px; font-size: 10px; }
   .drop-placeholder { display: none !important; }
+  .consolidacao-actions, .consolidacao-intro, .gt-matrix-wrap { display: none !important; }
+  .gt-stats { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .gt-stat { box-shadow: none; border: 1px solid #e5e7eb; padding: 8px; }
+  .gt-stat .value { font-size: 18px; }
+  .gt-top-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .gt-tier-column, .gt-ranking-row, .gt-note-list { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; page-break-inside: avoid; }
+  .gt-ranking-row { grid-template-columns: 32px 1fr 62px; }
+  .gt-ranking-row .gt-counts { display: none; }
 }
 
 @media (max-width: 600px) {
@@ -267,6 +351,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
   .modal-header { padding: 16px; }
   .modal-body { padding: 14px; }
   .votante-input { min-width: 100%; }
+  .gt-top-grid { grid-template-columns: 1fr; }
+  .gt-ranking-row { grid-template-columns: 36px 1fr; }
+  .gt-ranking-row .gt-score-box, .gt-ranking-row .gt-counts { grid-column: 2; text-align: left; }
 }
 </style>
 </head>
@@ -289,11 +376,74 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </div>
 
 <div class="tabs">
-  <button class="tab active" data-tab="priorizacao">Priorização GT</button>
+  <button class="tab active" data-tab="consolidacao">Consolidação GT</button>
+  <button class="tab" data-tab="priorizacao">Priorização GT</button>
   <button class="tab" data-tab="lista">Lista detalhada</button>
   <button class="tab" data-tab="ranking">Mais solicitadas</button>
   <button class="tab" data-tab="colegas">Por colega</button>
   <button class="tab" data-tab="modulos">Por módulo</button>
+</div>
+
+<div id="tab-consolidacao">
+  <div class="consolidacao-actions">
+    <button class="btn-action btn-print" id="btn-print-consolidacao">Imprimir / Salvar PDF</button>
+  </div>
+  <div class="consolidacao-intro">
+    <strong>Consolidação do Grupo de Trabalho.</strong> Resultado agregado dos arquivos de votação recebidos, com pontuação por prioridade e posição. A tela organiza o Top 12 proposto, o ranking completo, os consensos, as divergências relevantes e a matriz de votos por defensor para apoiar a deliberação coletiva.
+  </div>
+  <div class="gt-stats" id="gt-stats"></div>
+
+  <section class="gt-section">
+    <div class="gt-section-title">
+      <div>
+        <h2>Top 12 Proposto</h2>
+        <p>Distribuição em quatro faixas de encaminhamento, com três itens em cada faixa.</p>
+      </div>
+    </div>
+    <div class="gt-top-grid" id="gt-top12"></div>
+  </section>
+
+  <section class="gt-section">
+    <div class="gt-section-title">
+      <div>
+        <h2>Ranking Completo</h2>
+        <p>Todos os itens priorizáveis, ordenados pela pontuação consolidada.</p>
+      </div>
+    </div>
+    <div class="gt-ranking-list" id="gt-ranking"></div>
+  </section>
+
+  <section class="gt-section">
+    <div class="gt-section-title">
+      <div>
+        <h2>Consensos e Divergências</h2>
+        <p>Itens com apoio forte e itens que merecem deliberação expressa.</p>
+      </div>
+    </div>
+    <div class="gt-columns">
+      <div class="gt-note-list" id="gt-consensos"></div>
+      <div class="gt-note-list" id="gt-divergencias"></div>
+    </div>
+  </section>
+
+  <section class="gt-section">
+    <div class="gt-section-title">
+      <div>
+        <h2>Matriz de Votos</h2>
+        <p>Leitura horizontal da escolha de cada defensor em cada demanda.</p>
+      </div>
+    </div>
+    <div class="gt-matrix-wrap" id="gt-matrix"></div>
+  </section>
+
+  <section class="gt-section">
+    <div class="gt-section-title">
+      <div>
+        <h2>Observações sobre os votos recebidos</h2>
+      </div>
+    </div>
+    <div class="gt-alerts" id="gt-alertas"></div>
+  </section>
 </div>
 
 <div id="tab-lista" class="hidden">
@@ -364,7 +514,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
   <div class="module-chart" id="modulos-container"></div>
 </div>
 
-<div id="tab-priorizacao">
+<div id="tab-priorizacao" class="hidden">
   <div class="priorizacao-intro">
     <strong>Priorização do Grupo de Trabalho.</strong> Classifique cada melhoria pendente como <strong>Crítica, Alta, Média ou Baixa</strong> (máximo 3 itens em cada uma dessas classificações, exigindo trade-offs conscientes) ou no <strong>Backlog</strong> (sem limite, para itens pertinentes, mas que não cabem no top 12 e não serão priorizados no momento). Use <strong>Descartar</strong> para itens que não devam ser priorizados. Além dos botões, é possível arrastar o card com o mouse e soltar em outra classificação, e também reordenar dentro da mesma classificação arrastando o card para a posição desejada. A posição (#1, #2, ...) também é registrada. Quando terminar, identifique-se no campo abaixo e clique em <strong>Exportar votos (.json)</strong> para envio do arquivo no grupo de whatsapp. Use <strong>Imprimir / Salvar PDF</strong> para registro pessoal da sua classificação. Apenas Melhorias pendentes entram na priorização; falhas devem ser corrigidas pela Softplan independentemente do cronograma de melhorias.
   </div>
@@ -505,6 +655,15 @@ const LIMITED_TIERS = ['P0', 'P1', 'P2', 'P3'];
 const POSITIONED_TIERS = ['P0', 'P1', 'P2', 'P3', 'BACKLOG'];
 const BADGE_TIERS = ['P0', 'P1', 'P2', 'P3'];
 const PRIO_LABEL = { P0: 'Crítica', P1: 'Alta', P2: 'Média', P3: 'Baixa' };
+const VOTOS_GT = [
+  {"arquivo":"votos_priorizacao_saj_Amanda_Gabriela_Silva_Nassaro_2026-04-28.json","versaoArtefato":"2026-04-26","votante":"Amanda Gabriela Silva Nassaro","dataExportacao":"2026-04-28T16:41:38.109Z","totalMelhorias":29,"totalClassificadas":29,"votos":[[3,"P0",1],[4,"P3",1],[5,"P2",1],[6,"backlog",1],[9,"P1",1],[11,"backlog",9],[12,"P0",2],[13,"P1",2],[14,"backlog",2],[15,"backlog",3],[16,"backlog",4],[17,"descartada",null],[18,"backlog",5],[19,"P1",3],[20,"backlog",10],[22,"P3",3],[23,"P3",2],[24,"backlog",6],[25,"P2",2],[26,"backlog",7],[27,"P2",3],[28,"backlog",11],[31,"backlog",12],[32,"P0",3],[39,"backlog",13],[41,"backlog",14],[42,"backlog",15],[48,"backlog",8],[49,"backlog",16]]},
+  {"arquivo":"votos_priorizacao_saj_Leonardo_Gelatti_Backes_2026-04-28.json","versaoArtefato":"2026-04-26","votante":"Leonardo Gelatti Backes","dataExportacao":"2026-04-28T13:47:29.835Z","totalMelhorias":29,"totalClassificadas":29,"votos":[[3,"P0",2],[4,"backlog",1],[5,"P0",1],[6,"backlog",3],[9,"P2",1],[11,"P3",1],[12,"backlog",4],[13,"backlog",5],[14,"P2",2],[15,"backlog",6],[16,"P2",3],[17,"P0",3],[18,"backlog",7],[19,"backlog",12],[20,"backlog",13],[22,"backlog",14],[23,"backlog",2],[24,"backlog",8],[25,"P1",1],[26,"backlog",9],[27,"backlog",10],[28,"P1",2],[31,"P1",3],[32,"P3",2],[39,"backlog",15],[41,"backlog",16],[42,"P3",3],[48,"backlog",11],[49,"backlog",17]]},
+  {"arquivo":"votos_priorizacao_saj_Marcel_Macedo_2026-04-26 (1).json","versaoArtefato":"2026-04-25","votante":"Marcel Macedo","dataExportacao":"2026-04-26T05:22:13.386Z","totalMelhorias":29,"totalClassificadas":29,"votos":[[3,"P1",null],[4,"P1",null],[5,"P1",null],[6,"backlog",null],[9,"backlog",null],[11,"P2",null],[12,"P3",null],[13,"P0",null],[14,"backlog",null],[15,"backlog",null],[16,"backlog",null],[17,"P0",null],[18,"backlog",null],[19,"backlog",null],[20,"backlog",null],[22,"backlog",null],[23,"backlog",null],[24,"P2",null],[25,"backlog",null],[26,"P0",null],[27,"P3",null],[28,"P3",null],[31,"backlog",null],[32,"backlog",null],[39,"backlog",null],[41,"backlog",null],[42,"P2",null],[48,"backlog",null],[49,"descartada",null]]},
+  {"arquivo":"votos_priorizacao_saj_Marcos_Braga_da_Fonseca_2026-04-28.json","versaoArtefato":"2026-04-26","votante":"Marcos Braga da Fonseca","dataExportacao":"2026-04-28T17:05:19.820Z","totalMelhorias":29,"totalClassificadas":29,"votos":[[3,"P1",1],[4,"P3",1],[5,"P2",1],[6,"descartada",null],[9,"P3",2],[11,"descartada",null],[12,"descartada",null],[13,"P1",2],[14,"descartada",null],[15,"descartada",null],[16,"descartada",null],[17,"descartada",null],[18,"descartada",null],[19,"descartada",null],[20,"descartada",null],[22,"descartada",null],[23,"P0",1],[24,"P0",2],[25,"descartada",null],[26,"P3",3],[27,"descartada",null],[28,"descartada",null],[31,"descartada",null],[32,"descartada",null],[39,"P2",3],[41,"descartada",null],[42,"P0",3],[48,"P2",2],[49,"P1",3]]},
+  {"arquivo":"votos_priorizacao_saj_Paulo_Americo_2026-04-29.json","versaoArtefato":"2026-04-26","votante":"Paulo Americo","dataExportacao":"2026-04-29T02:20:32.256Z","totalMelhorias":29,"totalClassificadas":11,"votos":[[3,"P1",1],[4,"P2",1],[5,"P0",1],[6,null,null],[9,"P1",2],[11,null,null],[12,"P3",1],[13,"P3",2],[14,null,null],[15,null,null],[16,null,null],[17,null,null],[18,"descartada",null],[19,null,null],[20,null,null],[22,null,null],[23,"P2",2],[24,null,null],[25,"P3",3],[26,"P1",3],[27,null,null],[28,null,null],[31,null,null],[32,null,null],[39,null,null],[41,null,null],[42,null,null],[48,"P2",3],[49,null,null]]},
+  {"arquivo":"votos_priorizacao_saj_Pedro_de_Luna_Souza_Leite_2026-04-29.json","versaoArtefato":"2026-04-26","votante":"Pedro de Luna Souza Leite","dataExportacao":"2026-04-29T02:04:21.350Z","totalMelhorias":29,"totalClassificadas":29,"votos":[[3,"P0",2],[4,"P0",3],[5,"P1",1],[6,"descartada",null],[9,"P2",1],[11,"P3",2],[12,"P3",3],[13,"P2",2],[14,"backlog",1],[15,"backlog",2],[16,"descartada",null],[17,"descartada",null],[18,"descartada",null],[19,"descartada",null],[20,"descartada",null],[22,"P3",1],[23,"P1",2],[24,"P1",3],[25,"backlog",3],[26,"P2",3],[27,"backlog",4],[28,"backlog",6],[31,"descartada",null],[32,"descartada",null],[39,"descartada",null],[41,"backlog",7],[42,"P0",1],[48,"backlog",5],[49,"backlog",8]]},
+  {"arquivo":"votos_priorizacao_saj_Sara_Zam_Segura_Marcal_2026-04-28.json","versaoArtefato":"2026-04-26","votante":"Sara Zam Segura Marçal","dataExportacao":"2026-04-28T21:12:41.917Z","totalMelhorias":29,"totalClassificadas":28,"votos":[[3,"P0",2],[4,"P1",1],[5,"P0",1],[6,"backlog",2],[9,"backlog",3],[11,"P2",1],[12,"backlog",4],[13,"backlog",5],[14,"backlog",6],[15,"backlog",7],[16,"backlog",8],[17,"P3",1],[18,"backlog",9],[19,"P3",2],[20,"descartada",null],[22,"P3",3],[23,"backlog",1],[24,"P1",2],[25,"backlog",10],[26,"P1",3],[27,"backlog",11],[28,"backlog",13],[31,"P2",2],[32,"backlog",14],[39,"backlog",15],[41,null,null],[42,"P0",3],[48,"backlog",12],[49,"P2",3]]}
+];
 const tierLabelOf = (tierId) => PRIO_LABEL[tierId] || tierId;
 
 const formatDate = (iso) => { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
@@ -516,6 +675,199 @@ const uniqueSolicitantes = (s) => [...new Map(s.solicitantes.map(p => [p.nome, p
 const uniqueCount = (s) => uniqueSolicitantes(s).length;
 const fromGT = (s) => s.solicitantes.some(p => p.emailId === 'eGT');
 const fromEmail = (s) => s.solicitantes.some(p => p.emailId !== 'eGT');
+const prioKey = (p) => p || 'nao';
+const prioShortLabel = (p) => ({ P0: 'P0', P1: 'P1', P2: 'P2', P3: 'P3', backlog: 'Back', descartada: 'Desc', nao: '-' })[prioKey(p)] || '-';
+const prioLongLabel = (p) => ({ P0: 'Crítica', P1: 'Alta', P2: 'Média', P3: 'Baixa', backlog: 'Backlog', descartada: 'Descartada', nao: 'Não classificada' })[prioKey(p)] || 'Não classificada';
+
+const normalizarVotosGT = () => VOTOS_GT.map(votante => ({
+  ...votante,
+  votos: votante.votos.map(([id, prioridade, posicao]) => ({ id, prioridade, posicao }))
+}));
+
+const PONTOS_PRIORIDADE = {
+  P0: { 1: 12, 2: 11, 3: 10, default: 11 },
+  P1: { 1: 9, 2: 8, 3: 7, default: 8 },
+  P2: { 1: 6, 2: 5, 3: 4, default: 5 },
+  P3: { 1: 3, 2: 2, 3: 1, default: 2 }
+};
+
+const calcularPontuacaoVoto = (voto) => {
+  const tabela = PONTOS_PRIORIDADE[voto.prioridade];
+  if (!tabela) return 0;
+  return tabela[voto.posicao] || tabela.default;
+};
+
+const votoPrioritario = (v) => ['P0', 'P1', 'P2', 'P3'].includes(v?.prioridade);
+
+const consolidarVotosGT = () => {
+  const votantes = normalizarVotosGT();
+  const melhorias = dados.solicitacoes.filter(s => s.categoria === 'Melhoria' && !s.resolvido);
+  const melhoriasMap = new Map(melhorias.map(s => [s.id, s]));
+  const alertas = [];
+
+  const linhas = melhorias.map(s => ({
+    solicitacao: s,
+    id: s.id,
+    titulo: s.titulo,
+    modulo: s.modulo,
+    score: 0,
+    counts: { P0: 0, P1: 0, P2: 0, P3: 0, backlog: 0, descartada: 0, nao: 0 },
+    votosPorVotante: {},
+    votosDetalhados: []
+  }));
+  const linhasMap = new Map(linhas.map(r => [r.id, r]));
+
+  votantes.forEach(votante => {
+    if (votante.versaoArtefato !== ARTEFATO_VERSAO) {
+      alertas.push(`${votante.votante}: voto exportado na versão ${votante.versaoArtefato}; versão atual do artefato: ${ARTEFATO_VERSAO}.`);
+    }
+    const priorizados = votante.votos.filter(votoPrioritario);
+    const countsVotante = { P0: 0, P1: 0, P2: 0, P3: 0 };
+    priorizados.forEach(v => { countsVotante[v.prioridade]++; });
+    const faixasIncompletas = LIMITED_TIERS.filter(t => countsVotante[t] !== TIER_LIMIT);
+    if (faixasIncompletas.length) {
+      alertas.push(`${votante.votante}: ${priorizados.length} item(ns) priorizados em P0/P1/P2/P3; esperado: 12, com 3 em cada faixa.`);
+    }
+    const semPosicao = votante.votos.filter(v => votoPrioritario(v) && typeof v.posicao !== 'number');
+    if (semPosicao.length) {
+      alertas.push(`${votante.votante}: ${semPosicao.length} voto(s) priorizados sem posição; foi usada a pontuação média da faixa.`);
+    }
+    const naoClassificados = votante.votos.filter(v => v.prioridade === null);
+    if (naoClassificados.length) {
+      alertas.push(`${votante.votante}: ${naoClassificados.length} item(ns) não classificado(s). O esperado é enviar cada item como prioridade, backlog ou descartada.`);
+    }
+
+    const votosPorId = new Map(votante.votos.map(v => [v.id, v]));
+    melhorias.forEach(s => {
+      const voto = votosPorId.get(s.id) || { id: s.id, prioridade: null, posicao: null };
+      const linha = linhasMap.get(s.id);
+      const key = prioKey(voto.prioridade);
+      linha.counts[key] = (linha.counts[key] || 0) + 1;
+      const pontos = calcularPontuacaoVoto(voto);
+      linha.score += pontos;
+      linha.votosPorVotante[votante.votante] = { ...voto, pontos };
+      linha.votosDetalhados.push({ votante: votante.votante, ...voto, pontos });
+    });
+
+    votante.votos.forEach(v => {
+      if (!melhoriasMap.has(v.id)) alertas.push(`${votante.votante}: item ${v.id} não encontrado entre as melhorias pendentes atuais.`);
+    });
+  });
+
+  const ranking = linhas.sort((a, b) =>
+    b.score - a.score ||
+    (b.counts.P0 + b.counts.P1) - (a.counts.P0 + a.counts.P1) ||
+    b.counts.P0 - a.counts.P0 ||
+    a.titulo.localeCompare(b.titulo, 'pt-BR')
+  );
+  ranking.forEach((r, i) => { r.rank = i + 1; });
+
+  const consensos = ranking.filter(r => r.counts.P0 + r.counts.P1 >= Math.ceil(votantes.length / 2));
+  const divergencias = ranking.filter(r => (r.counts.P0 + r.counts.P1 > 0) && (r.counts.descartada > 0 || r.counts.backlog >= Math.ceil(votantes.length / 2) || r.counts.nao > 0));
+  return { votantes, melhorias, ranking, top12: ranking.slice(0, 12), consensos, divergencias, alertas };
+};
+
+const renderDistribuicaoGT = (row) => {
+  const total = Object.values(row.counts).reduce((acc, n) => acc + n, 0) || 1;
+  return ['P0', 'P1', 'P2', 'P3', 'backlog', 'descartada', 'nao']
+    .filter(k => row.counts[k] > 0)
+    .map(k => `<span class="gt-dist-seg ${k}" style="width:${(row.counts[k] / total) * 100}%"></span>`)
+    .join('');
+};
+
+const renderChipsGT = (row) => ['P0', 'P1', 'P2', 'P3', 'backlog', 'descartada', 'nao']
+  .filter(k => row.counts[k] > 0)
+  .map(k => `<span class="gt-chip ${k}">${prioShortLabel(k)} ${row.counts[k]}</span>`)
+  .join('');
+
+const buildGTCard = (row) => {
+  const s = row.solicitacao;
+  return `
+    <div class="gt-rank-line">
+      <span class="gt-rank">#${row.rank}</span>
+      <span class="gt-score">${row.score} pts</span>
+    </div>
+    <div class="gt-title">${escapeHtml(row.titulo)}</div>
+    <div class="gt-meta">${escapeHtml(row.modulo)} - ${uniqueCount(s)} solicitante${uniqueCount(s) > 1 ? 's' : ''}${s.integracao ? ' - Integração' : ''}${fromGT(s) ? ' - GT' : ''}</div>
+    <div class="gt-dist">${renderDistribuicaoGT(row)}</div>
+    <div class="gt-counts">${renderChipsGT(row)}</div>
+  `;
+};
+
+let consolidacaoGT = null;
+
+const renderConsolidacaoGT = () => {
+  consolidacaoGT = consolidarVotosGT();
+  const { votantes, melhorias, ranking, top12, consensos, divergencias, alertas } = consolidacaoGT;
+  const votantesComRessalva = new Set(alertas.map(a => a.split(':')[0]));
+
+  document.getElementById('gt-stats').innerHTML = [
+    ['Votantes', votantes.length],
+    ['Melhorias avaliadas', melhorias.length],
+    ['Top 12', top12.length],
+    ['Consensos fortes', consensos.length],
+    ['Divergências', divergencias.length],
+    ['Votos com ressalva', votantesComRessalva.size]
+  ].map(([label, value]) => `<div class="gt-stat"><div class="label">${label}</div><div class="value">${value}</div></div>`).join('');
+
+  const gruposTop = [
+    { label: 'Crítica', cls: 'p0', items: top12.slice(0, 3) },
+    { label: 'Alta', cls: 'p1', items: top12.slice(3, 6) },
+    { label: 'Média', cls: 'p2', items: top12.slice(6, 9) },
+    { label: 'Baixa', cls: 'p3', items: top12.slice(9, 12) }
+  ];
+  document.getElementById('gt-top12').innerHTML = gruposTop.map(g => `
+    <div class="gt-tier-column">
+      <div class="gt-tier-title ${g.cls}"><span>${g.label}</span><span>${g.items.length}/3</span></div>
+      ${g.items.map(row => `<div class="gt-top-card" data-sid="${row.id}" role="button" tabindex="0">${buildGTCard(row)}</div>`).join('')}
+    </div>
+  `).join('');
+
+  document.getElementById('gt-ranking').innerHTML = ranking.map(row => `
+    <div class="gt-ranking-row" data-sid="${row.id}" role="button" tabindex="0">
+      <span class="gt-rank">#${row.rank}</span>
+      <div class="gt-ranking-main">
+        <div class="gt-title">${escapeHtml(row.titulo)}</div>
+        <div class="gt-meta">${escapeHtml(row.modulo)} - ${uniqueCount(row.solicitacao)} solicitante${uniqueCount(row.solicitacao) > 1 ? 's' : ''}${row.solicitacao.integracao ? ' - Integração' : ''}</div>
+        <div class="gt-dist">${renderDistribuicaoGT(row)}</div>
+      </div>
+      <div class="gt-score-box"><strong>${row.score}</strong>pontos</div>
+      <div class="gt-counts">${renderChipsGT(row)}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('gt-consensos').innerHTML = `<h3>Consenso forte</h3>` + (consensos.length ? consensos.slice(0, 10).map(row => `
+    <div class="gt-note-item" data-sid="${row.id}"><strong>#${row.rank} ${escapeHtml(row.titulo)}</strong><br>${row.counts.P0 + row.counts.P1}/${votantes.length} voto(s) em Crítica ou Alta - ${row.score} pts</div>
+  `).join('') : '<div class="gt-note-item">Nenhum item atingiu o critério de consenso forte.</div>');
+
+  document.getElementById('gt-divergencias').innerHTML = `<h3>Divergências relevantes</h3>` + (divergencias.length ? divergencias.slice(0, 10).map(row => `
+    <div class="gt-note-item" data-sid="${row.id}"><strong>#${row.rank} ${escapeHtml(row.titulo)}</strong><br>P0/P1: ${row.counts.P0 + row.counts.P1}; Backlog: ${row.counts.backlog}; Descartada: ${row.counts.descartada}; Não: ${row.counts.nao}</div>
+  `).join('') : '<div class="gt-note-item">Nenhuma divergência relevante encontrada.</div>');
+
+  const header = ['<th>Demanda</th>'].concat(votantes.map(v => `<th title="${escapeHtml(v.votante)}">${escapeHtml(v.votante.split(' ')[0])}</th>`)).join('');
+  const rows = ranking.map(row => `
+    <tr>
+      <td class="gt-matrix-title" data-sid="${row.id}">#${row.rank} ${escapeHtml(row.titulo)}</td>
+      ${votantes.map(v => {
+        const voto = row.votosPorVotante[v.votante] || { prioridade: null, posicao: null };
+        const key = prioKey(voto.prioridade);
+        const label = prioShortLabel(key) + (voto.posicao && ['P0', 'P1', 'P2', 'P3'].includes(key) ? ` #${voto.posicao}` : '');
+        return `<td><span class="gt-vote-cell ${key}" title="${escapeHtml(v.votante)}: ${prioLongLabel(key)}${voto.posicao ? ` #${voto.posicao}` : ''}">${label}</span></td>`;
+      }).join('')}
+    </tr>
+  `).join('');
+  document.getElementById('gt-matrix').innerHTML = `<table class="gt-matrix"><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table>`;
+
+  document.getElementById('gt-alertas').innerHTML = alertas.length
+    ? `<ul>${alertas.map(a => `<li>${escapeHtml(a)}</li>`).join('')}</ul>`
+    : 'Nenhuma ressalva identificada nos votos recebidos.';
+
+  document.querySelectorAll('[data-sid]').forEach(el => {
+    const id = parseInt(el.getAttribute('data-sid'), 10);
+    el.addEventListener('click', () => openModal(id));
+    el.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openModal(id); } });
+  });
+};
 
 const modulos = [...new Set(dados.solicitacoes.map(s => s.modulo))].sort();
 const colegas = [...new Set(dados.solicitacoes.flatMap(s => s.solicitantes.map(p => p.nome)))].sort();
@@ -540,7 +892,7 @@ const switchTab = (tabName) => {
   document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
   const targetTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
   if (targetTab) targetTab.classList.add('active');
-  ['lista', 'ranking', 'colegas', 'modulos', 'priorizacao'].forEach(name => {
+  ['consolidacao', 'lista', 'ranking', 'colegas', 'modulos', 'priorizacao'].forEach(name => {
     document.getElementById('tab-' + name).classList.add('hidden');
   });
   document.getElementById('tab-' + tabName).classList.remove('hidden');
@@ -964,6 +1316,9 @@ const overLimitTiers = () => LIMITED_TIERS.filter(t => tierCount(t) > TIER_LIMIT
 const hasOverLimit = () => overLimitTiers().length > 0;
 
 const formatOverLabel = () => overLimitTiers().map(t => `${tierLabelOf(t)} (${tierCount(t)}/${TIER_LIMIT})`).join(', ');
+const incompleteLimitTiers = () => LIMITED_TIERS.filter(t => tierCount(t) !== TIER_LIMIT);
+const hasIncompleteLimitTiers = () => incompleteLimitTiers().length > 0;
+const formatIncompleteLabel = () => incompleteLimitTiers().map(t => `${tierLabelOf(t)} (${tierCount(t)}/${TIER_LIMIT})`).join(', ');
 
 const removeFromAllOrdens = (id) => {
   Object.keys(priorizacaoState.ordens).forEach(t => {
@@ -1031,7 +1386,8 @@ const renderPriorizacaoStats = () => {
   const fmtLimited = (key) => {
     const c = counts[key];
     const over = c > TIER_LIMIT;
-    return `<strong>${c}</strong>/${TIER_LIMIT}${over ? ' <span class="over-mark">⚠</span>' : ''}`;
+    const incomplete = c !== TIER_LIMIT;
+    return `<strong>${c}</strong>/${TIER_LIMIT}${over ? ' <span class="over-mark">⚠</span>' : (incomplete ? ' <span class="over-mark">!</span>' : '')}`;
   };
   const stats = document.getElementById('priorizacao-stats');
   stats.innerHTML = `
@@ -1116,6 +1472,7 @@ const buildPrioCard = (s, position, tierId) => {
 const updateActionButtonsState = () => {
   const overTiers = overLimitTiers();
   const hasOver = overTiers.length > 0;
+  const hasIncomplete = hasIncompleteLimitTiers();
   const exportBtn = document.getElementById('btn-export-json');
   const printBtn = document.getElementById('btn-print-pdf');
   const exportTooltip = document.getElementById('tooltip-export-json');
@@ -1126,11 +1483,13 @@ const updateActionButtonsState = () => {
 
   if (exportBtn) {
     let tooltip = '';
-    exportBtn.disabled = !validVotante || hasOver;
+    exportBtn.disabled = !validVotante || hasOver || hasIncomplete;
     if (!validVotante) {
       tooltip = 'Informe seu nome no campo "Seu nome" para habilitar a exportação dos votos.';
     } else if (hasOver) {
       tooltip = `Reduza para ${TIER_LIMIT} itens nas classificações ${overListLabel} antes de exportar.`;
+    } else if (hasIncomplete) {
+      tooltip = `Preencha exatamente ${TIER_LIMIT} itens em cada faixa antes de exportar: ${formatIncompleteLabel()}.`;
     } else {
       tooltip = 'Baixar arquivo JSON com seus votos.';
     }
@@ -1146,9 +1505,11 @@ const updateActionButtonsState = () => {
 
   const warnRow = document.getElementById('priorizacao-warning-row');
   const warnEl = document.getElementById('priorizacao-warning');
-  if (hasOver) {
+  if (hasOver || hasIncomplete) {
     warnRow.classList.remove('hidden');
-    warnEl.innerHTML = `⚠ <strong>Excesso de itens</strong> em ${overListLabel} — exportação JSON e impressão PDF bloqueadas até reduzir para ${TIER_LIMIT} itens em cada uma dessas classificações.`;
+    warnEl.innerHTML = hasOver
+      ? `⚠ <strong>Excesso de itens</strong> em ${overListLabel} — exportação JSON e impressão PDF bloqueadas até reduzir para ${TIER_LIMIT} itens em cada uma dessas classificações.`
+      : `⚠ <strong>Priorização incompleta</strong>: para exportar, classifique exatamente ${TIER_LIMIT} itens em cada faixa. Ajuste ${formatIncompleteLabel()}.`;
   } else {
     warnRow.classList.add('hidden');
     warnEl.innerHTML = '';
@@ -1326,6 +1687,10 @@ const exportarVotosJSON = () => {
     alert(`Reduza para ${TIER_LIMIT} itens nas classificações ${formatOverLabel()} antes de exportar.`);
     return;
   }
+  if (hasIncompleteLimitTiers()) {
+    alert(`Classifique exatamente ${TIER_LIMIT} itens em cada faixa antes de exportar. Ajuste: ${formatIncompleteLabel()}.`);
+    return;
+  }
   const all = melhoriasPriorizaveis();
   const votos = all.map(s => ({
     id: s.id,
@@ -1445,14 +1810,29 @@ document.getElementById('btn-print-pdf').addEventListener('click', () => {
   }
   const wasActiveTab = document.querySelector('.tab.active')?.dataset.tab;
   if (wasActiveTab !== 'priorizacao') switchTab('priorizacao');
+  document.body.classList.add('print-priorizacao');
+  document.body.classList.remove('print-consolidacao');
   setTimeout(() => {
     window.print();
+    document.body.classList.remove('print-priorizacao');
     if (wasOnlyPending) {
       onlyPending = true;
       document.getElementById('toggle-only-pending').checked = true;
       renderPriorizacao();
     }
     if (wasActiveTab && wasActiveTab !== 'priorizacao') switchTab(wasActiveTab);
+  }, 200);
+});
+
+document.getElementById('btn-print-consolidacao').addEventListener('click', () => {
+  const wasActiveTab = document.querySelector('.tab.active')?.dataset.tab;
+  if (wasActiveTab !== 'consolidacao') switchTab('consolidacao');
+  document.body.classList.add('print-consolidacao');
+  document.body.classList.remove('print-priorizacao');
+  setTimeout(() => {
+    window.print();
+    document.body.classList.remove('print-consolidacao');
+    if (wasActiveTab && wasActiveTab !== 'consolidacao') switchTab(wasActiveTab);
   }, 200);
 });
 
@@ -1468,6 +1848,7 @@ renderCards();
 renderRanking();
 renderColegas();
 renderModulos();
+renderConsolidacaoGT();
 renderPriorizacao();
 </script>
 </body>
