@@ -676,8 +676,9 @@ const uniqueCount = (s) => uniqueSolicitantes(s).length;
 const fromGT = (s) => s.solicitantes.some(p => p.emailId === 'eGT');
 const fromEmail = (s) => s.solicitantes.some(p => p.emailId !== 'eGT');
 const prioKey = (p) => p || 'nao';
-const prioShortLabel = (p) => ({ P0: 'P0', P1: 'P1', P2: 'P2', P3: 'P3', backlog: 'Back', descartada: 'Desc', nao: '-' })[prioKey(p)] || '-';
+const prioShortLabel = (p) => ({ P0: 'P0', P1: 'P1', P2: 'P2', P3: 'P3', backlog: 'Back', descartada: 'Desc', nao: 'Sem voto' })[prioKey(p)] || 'Sem voto';
 const prioLongLabel = (p) => ({ P0: 'Crítica', P1: 'Alta', P2: 'Média', P3: 'Baixa', backlog: 'Backlog', descartada: 'Descartada', nao: 'Não classificada' })[prioKey(p)] || 'Não classificada';
+const prioCssClass = (p) => prioKey(p).toLowerCase();
 
 const normalizarVotosGT = () => VOTOS_GT.map(votante => ({
   ...votante,
@@ -771,13 +772,13 @@ const renderDistribuicaoGT = (row) => {
   const total = Object.values(row.counts).reduce((acc, n) => acc + n, 0) || 1;
   return ['P0', 'P1', 'P2', 'P3', 'backlog', 'descartada', 'nao']
     .filter(k => row.counts[k] > 0)
-    .map(k => `<span class="gt-dist-seg ${k}" style="width:${(row.counts[k] / total) * 100}%"></span>`)
+    .map(k => `<span class="gt-dist-seg ${prioCssClass(k)}" style="width:${(row.counts[k] / total) * 100}%"></span>`)
     .join('');
 };
 
 const renderChipsGT = (row) => ['P0', 'P1', 'P2', 'P3', 'backlog', 'descartada', 'nao']
   .filter(k => row.counts[k] > 0)
-  .map(k => `<span class="gt-chip ${k}">${prioShortLabel(k)} ${row.counts[k]}</span>`)
+  .map(k => `<span class="gt-chip ${prioCssClass(k)}">${prioShortLabel(k)} ${row.counts[k]}</span>`)
   .join('');
 
 const buildGTCard = (row) => {
@@ -852,7 +853,7 @@ const renderConsolidacaoGT = () => {
         const voto = row.votosPorVotante[v.votante] || { prioridade: null, posicao: null };
         const key = prioKey(voto.prioridade);
         const label = prioShortLabel(key) + (voto.posicao && ['P0', 'P1', 'P2', 'P3'].includes(key) ? ` #${voto.posicao}` : '');
-        return `<td><span class="gt-vote-cell ${key}" title="${escapeHtml(v.votante)}: ${prioLongLabel(key)}${voto.posicao ? ` #${voto.posicao}` : ''}">${label}</span></td>`;
+        return `<td><span class="gt-vote-cell ${prioCssClass(key)}" title="${escapeHtml(v.votante)}: ${prioLongLabel(key)}${voto.posicao ? ` #${voto.posicao}` : ''}">${label}</span></td>`;
       }).join('')}
     </tr>
   `).join('');
