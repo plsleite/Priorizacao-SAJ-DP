@@ -123,7 +123,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .consolidacao-intro { background: white; border-left: 4px solid #1e3a8a; padding: 14px 18px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; color: #374151; line-height: 1.6; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
 .consolidacao-intro strong { color: #111827; }
 .gt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; margin-bottom: 14px; }
-.gt-stat { background: white; padding: 14px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.05); border-top: 3px solid #1e3a8a; }
+.gt-stat { background: white; padding: 14px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.05); border-top: 3px solid #1e3a8a; transition: transform .12s, box-shadow .12s, border-color .12s, background .12s; }
+.gt-stat.interactive { cursor: pointer; }
+.gt-stat.interactive:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.1); }
+.gt-stat.interactive.active { background: #eff6ff; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.18), 0 6px 14px rgba(0,0,0,.08); }
 .gt-stat .label { font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: #6b7280; font-weight: 700; }
 .gt-stat .value { font-size: 26px; font-weight: 800; color: #111827; margin-top: 3px; }
 .gt-section { margin-bottom: 18px; }
@@ -137,14 +140,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .gt-tier-title.p1 { background: linear-gradient(135deg, #c2410c, #ea580c); }
 .gt-tier-title.p2 { background: linear-gradient(135deg, #a16207, #ca8a04); }
 .gt-tier-title.p3 { background: linear-gradient(135deg, #1e40af, #3b82f6); }
-.gt-top-card { padding: 12px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background .12s; }
+.gt-top-card { padding: 12px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background .12s, box-shadow .12s, opacity .12s; }
 .gt-top-card:hover { background: #f9fafb; }
 .gt-top-card:last-child { border-bottom: 0; }
+.gt-top-grid.highlight-consenso .gt-top-card:not(.highlight-match),
+.gt-top-grid.highlight-divergencia .gt-top-card:not(.highlight-match) { opacity: .38; }
 .gt-rank-line { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; margin-bottom: 6px; }
 .gt-rank { min-width: 30px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: #f3f4f6; color: #374151; font-weight: 800; font-size: 12px; }
 .gt-score { font-size: 12px; font-weight: 800; color: #1e3a8a; white-space: nowrap; }
 .gt-title { font-weight: 800; font-size: 13px; color: #111827; line-height: 1.35; margin-bottom: 6px; }
 .gt-meta { color: #6b7280; font-size: 11px; margin-bottom: 8px; }
+.gt-card-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 7px; }
+.gt-status-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .25px; }
+.gt-status-badge.consenso { background: #dcfce7; color: #14532d; }
+.gt-status-badge.divergencia { background: #fef3c7; color: #92400e; }
 .gt-dist { display: flex; height: 9px; border-radius: 999px; overflow: hidden; background: #e5e7eb; margin-bottom: 7px; }
 .gt-dist-seg.p0 { background: #dc2626; }
 .gt-dist-seg.p1 { background: #ea580c; }
@@ -174,9 +183,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .gt-note-item { padding: 8px 0; border-top: 1px solid #f3f4f6; font-size: 12px; color: #4b5563; cursor: pointer; }
 .gt-note-item:first-of-type { border-top: 0; }
 .gt-note-item strong { color: #111827; }
-.gt-alerts { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 8px; font-size: 12px; color: #78350f; }
-.gt-alerts ul { margin-left: 18px; }
-.gt-alerts li { margin: 4px 0; }
 .gt-matrix-wrap { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.05); overflow-x: auto; }
 .gt-matrix { width: 100%; border-collapse: collapse; min-width: 920px; font-size: 12px; }
 .gt-matrix th, .gt-matrix td { border-bottom: 1px solid #f3f4f6; padding: 8px 10px; text-align: center; }
@@ -436,14 +442,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     <div class="gt-matrix-wrap" id="gt-matrix"></div>
   </section>
 
-  <section class="gt-section">
-    <div class="gt-section-title">
-      <div>
-        <h2>Observações sobre os votos recebidos</h2>
-      </div>
-    </div>
-    <div class="gt-alerts" id="gt-alertas"></div>
-  </section>
 </div>
 
 <div id="tab-lista" class="hidden">
@@ -676,7 +674,7 @@ const uniqueCount = (s) => uniqueSolicitantes(s).length;
 const fromGT = (s) => s.solicitantes.some(p => p.emailId === 'eGT');
 const fromEmail = (s) => s.solicitantes.some(p => p.emailId !== 'eGT');
 const prioKey = (p) => p || 'nao';
-const prioShortLabel = (p) => ({ P0: 'P0', P1: 'P1', P2: 'P2', P3: 'P3', backlog: 'Back', descartada: 'Desc', nao: 'Sem voto' })[prioKey(p)] || 'Sem voto';
+const prioShortLabel = (p) => ({ P0: 'Crítica', P1: 'Alta', P2: 'Média', P3: 'Baixa', backlog: 'Backlog', descartada: 'Descartada', nao: 'Sem voto' })[prioKey(p)] || 'Sem voto';
 const prioLongLabel = (p) => ({ P0: 'Crítica', P1: 'Alta', P2: 'Média', P3: 'Baixa', backlog: 'Backlog', descartada: 'Descartada', nao: 'Não classificada' })[prioKey(p)] || 'Não classificada';
 const prioCssClass = (p) => prioKey(p).toLowerCase();
 
@@ -789,27 +787,54 @@ const buildGTCard = (row) => {
       <span class="gt-score">${row.score} pts</span>
     </div>
     <div class="gt-title">${escapeHtml(row.titulo)}</div>
+    ${renderStatusBadgesGT(row)}
     <div class="gt-meta">${escapeHtml(row.modulo)} - ${uniqueCount(s)} solicitante${uniqueCount(s) > 1 ? 's' : ''}${s.integracao ? ' - Integração' : ''}${fromGT(s) ? ' - GT' : ''}</div>
     <div class="gt-dist">${renderDistribuicaoGT(row)}</div>
-    <div class="gt-counts">${renderChipsGT(row)}</div>
   `;
 };
 
+const renderStatusBadgesGT = (row) => {
+  const badges = [];
+  if (row.isConsenso) badges.push('<span class="gt-status-badge consenso">Consenso forte</span>');
+  if (row.isDivergencia) badges.push('<span class="gt-status-badge divergencia">Divergência</span>');
+  return badges.length ? `<div class="gt-card-badges">${badges.join('')}</div>` : '';
+};
+
 let consolidacaoGT = null;
+let destaqueConsolidacao = null;
+
+const gtStatCard = (label, value, filter = null) => {
+  const attrs = filter ? ` data-gt-filter="${filter}" role="button" tabindex="0" title="Clique para destacar no Top 12"` : '';
+  const cls = `gt-stat${filter ? ' interactive' : ''}${filter && destaqueConsolidacao === filter ? ' active' : ''}`;
+  return `<div class="${cls}"${attrs}><div class="label">${label}</div><div class="value">${value}</div></div>`;
+};
+
+const topCardClasses = (row) => {
+  const classes = ['gt-top-card'];
+  if (row.isConsenso) classes.push('is-consenso');
+  if (row.isDivergencia) classes.push('is-divergencia');
+  if ((destaqueConsolidacao === 'consenso' && row.isConsenso) || (destaqueConsolidacao === 'divergencia' && row.isDivergencia)) {
+    classes.push('highlight-match');
+  }
+  return classes.join(' ');
+};
 
 const renderConsolidacaoGT = () => {
   consolidacaoGT = consolidarVotosGT();
-  const { votantes, melhorias, ranking, top12, consensos, divergencias, alertas } = consolidacaoGT;
-  const votantesComRessalva = new Set(alertas.map(a => a.split(':')[0]));
+  const { votantes, melhorias, ranking, top12, consensos, divergencias } = consolidacaoGT;
+  const consensosIds = new Set(consensos.map(r => r.id));
+  const divergenciasIds = new Set(divergencias.map(r => r.id));
+  ranking.forEach(row => {
+    row.isConsenso = consensosIds.has(row.id);
+    row.isDivergencia = divergenciasIds.has(row.id);
+  });
 
   document.getElementById('gt-stats').innerHTML = [
-    ['Votantes', votantes.length],
-    ['Melhorias avaliadas', melhorias.length],
-    ['Top 12', top12.length],
-    ['Consensos fortes', consensos.length],
-    ['Divergências', divergencias.length],
-    ['Votos com ressalva', votantesComRessalva.size]
-  ].map(([label, value]) => `<div class="gt-stat"><div class="label">${label}</div><div class="value">${value}</div></div>`).join('');
+    gtStatCard('Votantes', votantes.length),
+    gtStatCard('Melhorias avaliadas', melhorias.length),
+    gtStatCard('Consensos fortes', consensos.length, 'consenso'),
+    gtStatCard('Divergências', divergencias.length, 'divergencia')
+  ].join('');
 
   const gruposTop = [
     { label: 'Crítica', cls: 'p0', items: top12.slice(0, 3) },
@@ -817,10 +842,12 @@ const renderConsolidacaoGT = () => {
     { label: 'Média', cls: 'p2', items: top12.slice(6, 9) },
     { label: 'Baixa', cls: 'p3', items: top12.slice(9, 12) }
   ];
-  document.getElementById('gt-top12').innerHTML = gruposTop.map(g => `
+  const top12El = document.getElementById('gt-top12');
+  top12El.className = `gt-top-grid${destaqueConsolidacao ? ` highlight-${destaqueConsolidacao}` : ''}`;
+  top12El.innerHTML = gruposTop.map(g => `
     <div class="gt-tier-column">
       <div class="gt-tier-title ${g.cls}"><span>${g.label}</span><span>${g.items.length}/3</span></div>
-      ${g.items.map(row => `<div class="gt-top-card" data-sid="${row.id}" role="button" tabindex="0">${buildGTCard(row)}</div>`).join('')}
+      ${g.items.map(row => `<div class="${topCardClasses(row)}" data-sid="${row.id}" role="button" tabindex="0">${buildGTCard(row)}</div>`).join('')}
     </div>
   `).join('');
 
@@ -829,6 +856,7 @@ const renderConsolidacaoGT = () => {
       <span class="gt-rank">#${row.rank}</span>
       <div class="gt-ranking-main">
         <div class="gt-title">${escapeHtml(row.titulo)}</div>
+        ${renderStatusBadgesGT(row)}
         <div class="gt-meta">${escapeHtml(row.modulo)} - ${uniqueCount(row.solicitacao)} solicitante${uniqueCount(row.solicitacao) > 1 ? 's' : ''}${row.solicitacao.integracao ? ' - Integração' : ''}</div>
         <div class="gt-dist">${renderDistribuicaoGT(row)}</div>
       </div>
@@ -859,9 +887,21 @@ const renderConsolidacaoGT = () => {
   `).join('');
   document.getElementById('gt-matrix').innerHTML = `<table class="gt-matrix"><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table>`;
 
-  document.getElementById('gt-alertas').innerHTML = alertas.length
-    ? `<ul>${alertas.map(a => `<li>${escapeHtml(a)}</li>`).join('')}</ul>`
-    : 'Nenhuma ressalva identificada nos votos recebidos.';
+  document.querySelectorAll('[data-gt-filter]').forEach(el => {
+    const filter = el.getAttribute('data-gt-filter');
+    const toggle = () => {
+      destaqueConsolidacao = destaqueConsolidacao === filter ? null : filter;
+      renderConsolidacaoGT();
+      document.getElementById('gt-top12')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    el.addEventListener('click', toggle);
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        toggle();
+      }
+    });
+  });
 
   document.querySelectorAll('[data-sid]').forEach(el => {
     const id = parseInt(el.getAttribute('data-sid'), 10);
